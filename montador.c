@@ -3,7 +3,7 @@
 #include <string.h>
 
 struct Label {
-	char nome[100];
+	char nome[101];
 	int endereco[2];
 	struct Label *next;
 };
