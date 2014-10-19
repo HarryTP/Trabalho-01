@@ -2,9 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-/*struct Label * comecoLabels = NULL;
-struct Label * finalLabels = NULL;
-struct Const * comecoConst = NULL;
+struct Label {
+	char nome[100];
+	int endereco[2];
+	struct Label *next;
+};
+
+Label *comecoLabels = NULL;
+Label *finalLabels = NULL;
+/*struct Const * comecoConst = NULL;
 struct Const * finalConst = NULL;*/
 int tracker[2] = {0, 0};
 
