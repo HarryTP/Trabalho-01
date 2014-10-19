@@ -8,6 +8,8 @@ struct Const * comecoConst = NULL;
 struct Const * finalConst = NULL;
 int tracker[2] = {0, 0};*/
 
+// algumacoisanessearquivo
+
 void primeiraPassada(FILE * arquivoEntrada) { return; }
 void segundaPassada(FILE * arquivoEntrada, FILE * arquivoSaida) { return; }
 
