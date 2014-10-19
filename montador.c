@@ -5,11 +5,139 @@
 /*struct Label * comecoLabels = NULL;
 struct Label * finalLabels = NULL;
 struct Const * comecoConst = NULL;
-struct Const * finalConst = NULL;
-int tracker[2] = {0, 0};*/
+struct Const * finalConst = NULL;*/
+int tracker[2] = {0, 0};
 
-void primeiraPassada(FILE * arquivoEntrada) { return; }
-void segundaPassada(FILE * arquivoEntrada, FILE * arquivoSaida) { return; }
+void armazenaLabel(char *label);
+void analisaDiretiva(int pass, char *dir, FILE *arquivoSaida);
+void analisaInstrucao(int pass, char *op, FILE *arquivoSaida);
+
+void erroSintaxe();
+void confereUsoLabels();
+
+void primeiraPassada(FILE * arquivoEntrada) {
+	char inputLine[1000];
+	char *token;
+	bool wholeLine = FALSE;
+	bool readLabel = FALSE;
+	bool readDirective = FALSE;
+	bool readOperation = FALSE;
+	
+	while (!feof(arquivoEntrada)) {
+		if (fgets(inputLine, 1000, arquivoEntrada) != NULL) {
+			if (inputLine[strlen(inputLine)-1] == "\n") /*Confere se toda a linha foi lida*/
+				wholeLine = TRUE;
+			else
+				wholeLine = FALSE;
+				
+			token = strtok(inputLine, " \n");
+			while (token != NULL) {
+				if (token[strlen(token)-1] == ":") { /*Label*/
+					if (!readLabel && !readDirective && !readOperation) {
+						armazenaLabel(token);
+						readLabel = TRUE;
+						token = strtok(NULL, " \n");
+					}
+					else
+						erroSintaxe();
+				}
+				
+				else if (token[0] == ".") { /*Diretiva*/
+					if (!readDirective && !readOperation) {
+						analisaDiretiva(1, token);
+						readDirective = TRUE;
+						token = strtok(NULL, " \n");
+					}
+					else
+						erroSintaxe();
+				}
+				
+				else if (token[0] == "#") { /*Comentario*/
+					while (!wholeLine) {
+						fgets(inputLine, 1000, arquivoEntrada);
+						if (inputLine[strlen(inputLine)-1] == "\n")
+							wholeLine = TRUE;
+						else
+							wholeLine = FALSE;
+					}
+					readLabel = FALSE;
+					readDirective = FALSE;
+					readOperation = FALSE;
+					token = NULL;
+				}
+				
+				else { /*Instrucao*/
+					if (!readOperation && !readDirective) {
+						analisaInstrucao(1, token);
+						readOperation = TRUE;
+						token = strtok(NULL, " \n");
+					}
+					else
+						erroSintaxe();
+				}
+			}
+		}
+	}
+	
+	conferePendentes();/*Conferir se nenhuma label foi usada sem ter sido declarada, ou se alguma constante
+	foi usada antes de ser declarada*/
+}
+
+void segundaPassada(FILE * arquivoEntrada, FILE * arquivoSaida) {
+	char inputLine[1000];
+	char *token;
+	bool wholeLine = FALSE;
+	
+	while (!feof(arquivoEntrada)) {
+		if (fgets(inputLine, 1000, arquivoEntrada) != NULL) {
+			if (inputLine[strlen(inputLine)-1] == "\n") /*Confere se toda a linha foi lida*/
+				wholeLine = TRUE;
+			else
+				wholeLine = FALSE;
+				
+			token = strtok(inputLine, " \n");
+			while (token != NULL) {
+				if (token[strlen(token)-1] == ":") /*Label*/
+					token = strtok(NULL, " \n");
+				
+				else if (token[0] == ".") { /*Diretiva*/
+					analisaDiretiva(2, token, arquivoSaida);
+					while (!wholeLine) {
+						fgets(inputLine, 1000, arquivoEntrada);
+						if (inputLine[strlen(inputLine)-1] == "\n")
+							wholeLine = TRUE;
+						else
+							wholeLine = FALSE;
+					}
+					token = NULL;
+				}
+				
+				else if (token[0] == "#") { /*Comentario*/
+					while (!wholeLine) {
+						fgets(inputLine, 1000, arquivoEntrada);
+						if (inputLine[strlen(inputLine)-1] == "\n")
+							wholeLine = TRUE;
+						else
+							wholeLine = FALSE;
+					}
+					token = NULL;
+				}
+				
+				else { /*Instrucao*/
+					analisaInstrucao(2, token, arquivoSaida);
+					while (!wholeLine) {
+						fgets(inputLine, 1000, arquivoEntrada);
+						if (inputLine[strlen(inputLine)-1] == "\n")
+							wholeLine = TRUE;
+						else
+							wholeLine = FALSE;
+					}
+					token = NULL;
+				}
+			}
+		}
+	}
+}
 
 int main(int argc, char *argv[]) {
 	FILE * arquivoEntrada;
@@ -19,7 +147,7 @@ int main(int argc, char *argv[]) {
 	/* Inicializacao de variaveis*/
 	if (argc < 2 || argc > 3) {
 		printf("ERRO: Insira apenas um ou dois argumentos, correspondentes a, respectivamente, o nome do arquivo de entrada e (opcionalmente) o nome do arquivo de saida.");
-		return 0;
+		exit(1);
 	}
 	else if (argc == 2) {
 		arquivoEntrada = fopen(argv[1], "r");
@@ -27,7 +155,7 @@ int main(int argc, char *argv[]) {
 		strcpy(nomeTemp, argv[1]);
 		strcat(nomeTemp, ".hex");
 		arquivoSaida = fopen(nomeTemp, "w");
-		printf("%c", nomeTemp[strlen(nomeTemp)-1]);
+		printf("%c", nomeTemp[strlen(nomeTemp)-1]); /*O que eh isso? */
 		free(nomeTemp);
 	}
 	else {
@@ -37,6 +165,9 @@ int main(int argc, char *argv[]) {
 	
 	/*Execucao principal */
 	primeiraPassada(arquivoEntrada);
+	rewind(arquivoEntrada);
+	tracker[0] = 0;
+	tracker[1] = 0;
 	segundaPassada(arquivoEntrada, arquivoSaida);
 	
 	fclose(arquivoEntrada);
