@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 struct Label {
 	char nome[101];
@@ -8,74 +9,75 @@ struct Label {
 	struct Label *next;
 };
 
-Label *comecoLabels = NULL;
-Label *finalLabels = NULL;
+struct Label *comecoLabels = NULL;
+struct Label *finalLabels = NULL;
 /*struct Const * comecoConst = NULL;
 struct Const * finalConst = NULL;*/
 int tracker[2] = {0, 0};
 
-void armazenaLabel(char *label);
-void analisaDiretiva(int pass, char *dir, FILE *arquivoSaida);
-void analisaInstrucao(int pass, char *op, FILE *arquivoSaida);
+void armazenaLabel(char *label) { return; };
+void analisaDiretiva(char *dir, FILE *arquivoSaida) { return; }; /* Se arquivoSaida = NULL, primeira passada, senao segunda */
+void analisaInstrucao(char *op, FILE *arquivoSaida) { return; }; /* Se arquivoSaida = NULL, primeira passada, senao segunda */
 
-void erroSintaxe();
-void confereUsoLabels();
+void erroSintaxe() { return; };
+void confereUsoLabels() { return; };
+void conferePendentes() { return; };
 
 void primeiraPassada(FILE * arquivoEntrada) {
 	char inputLine[1000];
 	char *token;
-	bool wholeLine = FALSE;
-	bool readLabel = FALSE;
-	bool readDirective = FALSE;
-	bool readOperation = FALSE;
+	bool wholeLine = false;
+	bool readLabel = false;
+	bool readDirective = false;
+	bool readOperation = false;
 	
 	while (!feof(arquivoEntrada)) {
 		if (fgets(inputLine, 1000, arquivoEntrada) != NULL) {
-			if (inputLine[strlen(inputLine)-1] == "\n") /*Confere se toda a linha foi lida*/
-				wholeLine = TRUE;
+			if (inputLine[strlen(inputLine)-1] == '\n') /*Confere se toda a linha foi lida*/
+				wholeLine = true;
 			else
-				wholeLine = FALSE;
+				wholeLine = false;
 				
 			token = strtok(inputLine, " \n");
 			while (token != NULL) {
-				if (token[strlen(token)-1] == ":") { /*Label*/
+				if (token[strlen(token)-1] == ':') { /*Label*/
 					if (!readLabel && !readDirective && !readOperation) {
 						armazenaLabel(token);
-						readLabel = TRUE;
+						readLabel = true;
 						token = strtok(NULL, " \n");
 					}
 					else
 						erroSintaxe();
 				}
 				
-				else if (token[0] == ".") { /*Diretiva*/
+				else if (token[0] == '.') { /*Diretiva*/
 					if (!readDirective && !readOperation) {
-						analisaDiretiva(1, token);
-						readDirective = TRUE;
+						analisaDiretiva(token, NULL);
+						readDirective = true;
 						token = strtok(NULL, " \n");
 					}
 					else
 						erroSintaxe();
 				}
 				
-				else if (token[0] == "#") { /*Comentario*/
+				else if (token[0] == '#') { /*Comentario*/
 					while (!wholeLine) {
 						fgets(inputLine, 1000, arquivoEntrada);
-						if (inputLine[strlen(inputLine)-1] == "\n")
-							wholeLine = TRUE;
+						if (inputLine[strlen(inputLine)-1] == '\n')
+							wholeLine = true;
 						else
-							wholeLine = FALSE;
+							wholeLine = false;
 					}
-					readLabel = FALSE;
-					readDirective = FALSE;
-					readOperation = FALSE;
+					readLabel = false;
+					readDirective = false;
+					readOperation = false;
 					token = NULL;
 				}
 				
 				else { /*Instrucao*/
 					if (!readOperation && !readDirective) {
-						analisaInstrucao(1, token);
-						readOperation = TRUE;
+						analisaInstrucao(token, NULL);
+						readOperation = true;
 						token = strtok(NULL, " \n");
 					}
 					else
@@ -92,51 +94,51 @@ void primeiraPassada(FILE * arquivoEntrada) {
 void segundaPassada(FILE * arquivoEntrada, FILE * arquivoSaida) {
 	char inputLine[1000];
 	char *token;
-	bool wholeLine = FALSE;
+	bool wholeLine = false;
 	
 	while (!feof(arquivoEntrada)) {
 		if (fgets(inputLine, 1000, arquivoEntrada) != NULL) {
-			if (inputLine[strlen(inputLine)-1] == "\n") /*Confere se toda a linha foi lida*/
-				wholeLine = TRUE;
+			if (inputLine[strlen(inputLine)-1] == '\n') /*Confere se toda a linha foi lida*/
+				wholeLine = true;
 			else
-				wholeLine = FALSE;
+				wholeLine = false;
 				
 			token = strtok(inputLine, " \n");
 			while (token != NULL) {
-				if (token[strlen(token)-1] == ":") /*Label*/
+				if (token[strlen(token)-1] == ':') /*Label*/
 					token = strtok(NULL, " \n");
 				
-				else if (token[0] == ".") { /*Diretiva*/
-					analisaDiretiva(2, token, arquivoSaida);
+				else if (token[0] == '.') { /*Diretiva*/
+					analisaDiretiva(token, arquivoSaida);
 					while (!wholeLine) {
 						fgets(inputLine, 1000, arquivoEntrada);
-						if (inputLine[strlen(inputLine)-1] == "\n")
-							wholeLine = TRUE;
+						if (inputLine[strlen(inputLine)-1] == '\n')
+							wholeLine = true;
 						else
-							wholeLine = FALSE;
+							wholeLine = false;
 					}
 					token = NULL;
 				}
 				
-				else if (token[0] == "#") { /*Comentario*/
+				else if (token[0] == '#') { /*Comentario*/
 					while (!wholeLine) {
 						fgets(inputLine, 1000, arquivoEntrada);
-						if (inputLine[strlen(inputLine)-1] == "\n")
-							wholeLine = TRUE;
+						if (inputLine[strlen(inputLine)-1] == '\n')
+							wholeLine = true;
 						else
-							wholeLine = FALSE;
+							wholeLine = false;
 					}
 					token = NULL;
 				}
 				
 				else { /*Instrucao*/
-					analisaInstrucao(2, token, arquivoSaida);
+					analisaInstrucao(token, arquivoSaida);
 					while (!wholeLine) {
 						fgets(inputLine, 1000, arquivoEntrada);
-						if (inputLine[strlen(inputLine)-1] == "\n")
-							wholeLine = TRUE;
+						if (inputLine[strlen(inputLine)-1] == '\n')
+							wholeLine = true;
 						else
-							wholeLine = FALSE;
+							wholeLine = false;
 					}
 					token = NULL;
 				}
