@@ -19,7 +19,7 @@ void analisaDiretiva(int pass, char *dir, FILE *arquivoSaida);
 void analisaInstrucao(int pass, char *op, FILE *arquivoSaida);
 
 void erroSintaxe();
-void confereUsoLabels();
+void conferePendentes();
 
 void primeiraPassada(FILE * arquivoEntrada) {
 	char inputLine[1000];
