@@ -6,7 +6,7 @@
 struct Label {
 	char nome[101];
 	int endereco[2];
-	struct Label *next;
+	struct Label * next;
 };
 
 struct Label *comecoLabels = NULL;
@@ -15,7 +15,6 @@ struct Label *finalLabels = NULL;
 struct Const * finalConst = NULL;*/
 int tracker[2] = {0, 0};
 
-void armazenaLabel(char *label) { return; };
 void analisaDiretiva(char *dir, FILE *arquivoSaida) { return; }; /* Se arquivoSaida = NULL, primeira passada, senao segunda */
 void analisaInstrucao(char *op, FILE *arquivoSaida) { return; }; /* Se arquivoSaida = NULL, primeira passada, senao segunda */
 
@@ -23,6 +22,47 @@ void erroSintaxe() { return; };
 void confereUsoLabels() { return; };
 void conferePendentes() { return; };
 
+void armazenaLabel(char *label) { 
+	struct Label newLabel;
+	char nomeTemp[101] = "";
+	int i;
+	
+	/* Tamanho invalido */
+	if (strlen(label) > 101)
+		erroSintaxe();
+	
+	/* Retira : */
+	strncpy (nomeTemp, label, strlen(label)-1);
+	nomeTemp[strlen(label)] = '\0';
+	
+	/* Analise de sintaxe */
+	for (i = 0; i < strlen(nomeTemp); i++) {
+		if ( !isalpha(nomeTemp[i]) && !(nomeTemp[i] == '_') )
+			erroSintaxe();
+	}
+	
+	/* Seta a nova variavel */
+	strcpy(newLabel.nome, nomeTemp);
+	if (tracker[1] == 1) {
+		newLabel.endereco[0] = tracker[0]+1;
+		newLabel.endereco[1] = 0;
+	}
+	else {
+		newLabel.endereco[0] = tracker[0];
+		newLabel.endereco[1] = 1;
+	}
+	newLabel.next = NULL;
+	
+	/* Concatena na lista */
+	if (comecoLabels == NULL) {
+		comecoLabels = &newLabel;
+		finalLabels = &newLabel;
+	}
+	else {
+		finalLabels->next = &newLabel;
+		finalLabels = &newLabel;
+	}	
+}
 
 void primeiraPassada(FILE * arquivoEntrada) {
 	char inputLine[1000];
@@ -155,7 +195,7 @@ int main(int argc, char *argv[]) {
 	
 	/* Inicializacao de variaveis*/
 	if (argc < 2 || argc > 3) {
-		printf("ERRO: Insira apenas um ou dois argumentos, correspondentes a, respectivamente, o nome do arquivo de entrada e (opcionalmente) o nome do arquivo de saida.");
+		printf("ERRO: Insira apenas um ou dois argumentos, correspondentes a, respectivamente, o nome do arquivo de entrada e (opcionalmente) o nome do arquivo de saida.\n");
 		exit(1);
 	}
 	else if (argc == 2) {
@@ -164,7 +204,6 @@ int main(int argc, char *argv[]) {
 		strcpy(nomeTemp, argv[1]);
 		strcat(nomeTemp, ".hex");
 		arquivoSaida = fopen(nomeTemp, "w");
-		printf("%c", nomeTemp[strlen(nomeTemp)-1]); /*O que eh isso? */
 		free(nomeTemp);
 	}
 	else {
