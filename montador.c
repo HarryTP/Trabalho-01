@@ -19,14 +19,10 @@ void armazenaLabel(char *label) { return; };
 void analisaDiretiva(char *dir, FILE *arquivoSaida) { return; }; /* Se arquivoSaida = NULL, primeira passada, senao segunda */
 void analisaInstrucao(char *op, FILE *arquivoSaida) { return; }; /* Se arquivoSaida = NULL, primeira passada, senao segunda */
 
-<<<<<<< HEAD
-void erroSintaxe();
-void conferePendentes();
-=======
 void erroSintaxe() { return; };
 void confereUsoLabels() { return; };
 void conferePendentes() { return; };
->>>>>>> origin/master
+
 
 void primeiraPassada(FILE * arquivoEntrada) {
 	char inputLine[1000];
