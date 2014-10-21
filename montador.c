@@ -31,24 +31,88 @@ int tracker[2] = {0, 0};
 void analisaInstrucao(char *op, FILE *arquivoSaida) { return; }; /* Se arquivoSaida = NULL, primeira passada, senao segunda */
 
 void erroSintaxe() { return; };
+void erroEnderecoInvalido() { return; };
+
 void confereUsoLabels() { return; };
+void armazenaConstante(char nome[101], int valor) { return; };
+void confereConflitoNome(char *nome) { return; }; /*Confere se um nome ja nao foi usado*/
 void conferePendentes(char nome[101], int tipo) { return; }; /*Procura na lista de pendencias e remove, tipo 0 para label e tipo 1 para constante*/
-void confereNumeroNome(char *valor) { return; }; /*Testa se o numero ou nome eh valido*/
+int confereNumeroNome(char *valor) { return 0; }; /*Testa se o numero ou nome eh valido*/
 
 void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL, primeira passada, senao segunda */
 	char *token;
+	char nomeConst[101];
+	int tipo;
+	int n;
+	int i;
 	
 	if (arquivoSaida == NULL) {
-		switch (dir) {
-			case .word:
-				if (tracker[1] == 1)
-					erroSintaxe();
-				else {
-					token = strtok(NULL, " \n");
-					confereNumeroConstante(token);
-					tracker[0] = tracker[0]+1;
-				}
+		if (!strcmp(dir, ".word")) {
+			if (tracker[1] == 1)
+				erroSintaxe();
+			else {
+				token = strtok(NULL, " \n");
+				tipo = confereNumeroNome(token);
+				/*Caso seja um nome, tratar na lista de pendencias*/
+				if (tracker[0] > 1023)
+					erroEnderecoInvalido();
+				tracker[0] = tracker[0]+1;
+			}
 		}
+		else if(!strcmp(dir, ".wfill")) {
+			if (tracker[1] == 1)
+				erroSintaxe();
+			else {
+				token = strtok(NULL, " \n");
+				tipo = confereNumeroNome(token);
+				/*Trata o primeiro argumento de wfill (n)*/
+				token = strtok(NULL, " \n");
+				tipo = confereNumeroNome(token);
+				/*Caso seja um nome, tratar na lista de pendencias*/
+				for (i = 0; i < n; i++)
+					tracker[0] = tracker[0]+1;
+				if (tracker[0] > 1024)
+					erroEnderecoInvalido();
+			}
+		}
+		else if(!strcmp(dir, ".org")) {
+			token = strtok(NULL, " \n");
+			tipo = confereNumeroNome(token);
+			/*Trata o numero e coloca em n*/
+			tracker[0] = n;
+			tracker[1] = 0;
+		}
+		else if(!strcmp(dir, ".align")) {
+			token = strtok(NULL, " \n");
+			tipo = confereNumeroNome(token);
+			/*Trata o numero e coloca em n*/
+			if (tracker[1] == 1) {
+				tracker[0] = tracker[0]+1;
+				tracker[1] = 0;
+			}
+			while (tracker[0]%n)
+				tracker[0] = tracker[0]+1;
+			if (tracker[0] > 1024)
+				erroEnderecoInvalido();
+		}
+		else if(!strcmp(dir, ".set")) {
+			token = strtok(NULL, " \n");
+			tipo = confereNumeroNome(token);
+			if (tipo != 0)
+				erroSintaxe();
+			else {
+			strncpy(nomeConst, token, strlen(token))
+			nomeConst[strlen(token)] = '\0';
+			}
+			confereConflitoNome(nomeConst);
+			conferePendentes(nomeConst, 1);
+			token = strtok(NULL, " \n");
+			tipo = confereNumeroNome(token);
+			/*Trata o numero e coloca em n*/
+			armazenaConstante(nomeConst, n);
+		}
+		else
+			erroSintaxe();
 	}
 }
 
@@ -64,7 +128,7 @@ void armazenaLabel(char *label) {
 	
 	/* Retira : */
 	strncpy (nomeTemp, label, strlen(label)-1);
-	nomeTemp[strlen(label)] = '\0';
+	nomeTemp[strlen(label)-1] = '\0';
 	
 	/* Analise de sintaxe */
 	for (i = 0; i < strlen(nomeTemp); i++) {
@@ -72,7 +136,8 @@ void armazenaLabel(char *label) {
 			erroSintaxe();
 	}
 	
-	/*confereNumeroConstante(label); <- poderia ser usada no lugar do pedaço de cima. */
+	/*confereNumeroNome(nomeTemp); <- poderia ser usada no lugar do pedaço de cima. */
+	confereConflitoNome(nomeTemp);
 	
 	/* Seta a nova variavel */
 	strcpy(newLabel.nome, nomeTemp);
@@ -97,7 +162,7 @@ void armazenaLabel(char *label) {
 	}
 	
 	/* Confere pendencias */
-	conferePendentes(newLabel.nome);
+	conferePendentes(newLabel.nome, 0);
 }
 
 
