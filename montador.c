@@ -29,8 +29,6 @@ struct Pend *comecoPend = NULL;
 struct Pend *finalPend = NULL;
 int tracker[2] = {0, 0};
 
-void analisaInstrucao(char *op, FILE *arquivoSaida) { return; }; /* Se arquivoSaida = NULL, primeira passada, senao segunda */
-
 void erroEnderecoInvalido() {
 	printf("Entrou em erroEnderecoInvalido\n");
 	exit(1);
@@ -49,6 +47,17 @@ void armazenaConstante(char nome[101], int valor) { return; };
 void confereConflitoNome(char *nome) { return; }; /*Confere se um nome ja nao foi usado*/
 void conferePendentes(char nome[101], int tipo) { return; }; /*Procura na lista de pendencias e remove, tipo 0 para label e tipo 1 para constante*/
 
+char * convertToLower(char *str) {
+	int i;
+	
+	if (str != NULL) {
+		for (i = 0; i < strlen(str); i++)
+			str[i] = tolower(str[i]);
+	}
+	
+	return str;
+}
+
 int confereNumeroNome(char *valor) { /*Testa se o numero ou nome eh valido*/
 	/* Codigos de retorno:
 	 * 0 - Nome
@@ -63,21 +72,21 @@ int confereNumeroNome(char *valor) { /*Testa se o numero ou nome eh valido*/
 		/* Numero em base =/= 10 */
 		case '0':
 			/* Hexadecimal */
-			if (valor[1] == 'x' || valor[1] == 'X') {
+			if (valor[1] == 'x') {
 				for (i = 2; i < strlen(valor); i++)
 					if ( ! (valor[i] == '0' || valor[i] == '1' || valor[i] == '2' || valor[i] == '3' || valor[i] == '4' || valor[i] == '5' || valor[i] == '6' || valor[i] == '7' || valor[i] == '8' || valor[i] == '9' || valor[i] == 'A' || valor[i] == 'B' || valor[i] == 'C' || valor[i] == 'D' || valor[i] == 'E' || valor[i] == 'F') )
 						erroSintaxe();
 				return 4;
 			}
 			/* Octal */
-			if (valor[1] == 'o' || valor[1] == 'O') {
+			if (valor[1] == 'o') {
 				for (i = 2; i < strlen(valor); i++)
 					if (! (valor[i] == '0' || valor[i] == '1' || valor[i] == '2' || valor[i] == '3' || valor[i] == '4' || valor[i] == '5' || valor[i] == '6' || valor[i] == '7') )
 						erroSintaxe();
 				return 2;
 			}
 			/* Binario */
-			if (valor[1] == 'b' || valor[1] == 'B') {
+			if (valor[1] == 'b') {
 				for (i = 2; i < strlen(valor); i++)
 					if ( !(valor[i] == '0' || valor[i] == '1') )
 						erroSintaxe();
@@ -103,6 +112,443 @@ int confereNumeroNome(char *valor) { /*Testa se o numero ou nome eh valido*/
 	}
 }
 
+void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL, primeira passada, senao segunda */
+	char *token;
+	
+	if (arquivoSaida == NULL) {
+		if (!strcmp(op, "ldmq")) {
+			if (tracker[0] < 1024) {
+				if (tracker[1] == 0)
+					tracker[1] = 1;
+				else {
+					tracker[0] = tracker[0]+1;
+					tracker[1] = 0;
+				}
+			}
+			else
+				erroEnderecoInvalido();
+		}
+		else if (!strcmp(op, "ldmqm")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			/*Isola o valor dentro de M(), e analisa*/
+			if (tracker[0] < 1024) {
+				if (tracker[1] == 0)
+					tracker[1] = 1;
+				else {
+					tracker[0] = tracker[0]+1;
+					tracker[1] = 0;
+				}
+			}
+			else
+				erroEnderecoInvalido();
+		}
+		else if (!strcmp(op, "str")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			/*Isola o valor dentro de M(), e analisa*/
+			if (tracker[0] < 1024) {
+				if (tracker[1] == 0)
+					tracker[1] = 1;
+				else {
+					tracker[0] = tracker[0]+1;
+					tracker[1] = 0;
+				}
+			}
+			else
+				erroEnderecoInvalido();
+		}
+		else if (!strcmp(op, "load")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			/*Isola o valor dentro de M(), e analisa*/
+			if (tracker[0] < 1024) {
+				if (tracker[1] == 0)
+					tracker[1] = 1;
+				else {
+					tracker[0] = tracker[0]+1;
+					tracker[1] = 0;
+				}
+			}
+			else
+				erroEnderecoInvalido();
+		}
+		else if (!strcmp(op, "ldn")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			/*Isola o valor dentro de M(), e analisa*/
+			if (tracker[0] < 1024) {
+				if (tracker[1] == 0)
+					tracker[1] = 1;
+				else {
+					tracker[0] = tracker[0]+1;
+					tracker[1] = 0;
+				}
+			}
+			else
+				erroEnderecoInvalido();
+		}
+		else if (!strcmp(op, "ldabs")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			/*Isola o valor dentro de M(), e analisa*/
+			if (tracker[0] < 1024) {
+				if (tracker[1] == 0)
+					tracker[1] = 1;
+				else {
+					tracker[0] = tracker[0]+1;
+					tracker[1] = 0;
+				}
+			}
+			else
+				erroEnderecoInvalido();
+		}
+		else if (!strcmp(op, "jmp")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			/*Isola o valor dentro de M(), e analisa, podendo haver 0:19 ou 20:39*/
+			if (tracker[0] < 1024) {
+				if (tracker[1] == 0)
+					tracker[1] = 1;
+				else {
+					tracker[0] = tracker[0]+1;
+					tracker[1] = 0;
+				}
+			}
+			else
+				erroEnderecoInvalido();
+		}
+		else if (!strcmp(op, "jgez")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			/*Isola o valor dentro de M(), e analisa, podendo haver 0:19 ou 20:39*/
+			if (tracker[0] < 1024) {
+				if (tracker[1] == 0)
+					tracker[1] = 1;
+				else {
+					tracker[0] = tracker[0]+1;
+					tracker[1] = 0;
+				}
+			}
+			else
+				erroEnderecoInvalido();
+		}
+		else if (!strcmp(op, "add")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			/*Isola o valor dentro de M(), e analisa*/
+			if (tracker[0] < 1024) {
+				if (tracker[1] == 0)
+					tracker[1] = 1;
+				else {
+					tracker[0] = tracker[0]+1;
+					tracker[1] = 0;
+				}
+			}
+			else
+				erroEnderecoInvalido();
+		}
+		else if (!strcmp(op, "addabs")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			/*Isola o valor dentro de M(), e analisa*/
+			if (tracker[0] < 1024) {
+				if (tracker[1] == 0)
+					tracker[1] = 1;
+				else {
+					tracker[0] = tracker[0]+1;
+					tracker[1] = 0;
+				}
+			}
+			else
+				erroEnderecoInvalido();
+		}
+		else if (!strcmp(op, "sub")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			/*Isola o valor dentro de M(), e analisa*/
+			if (tracker[0] < 1024) {
+				if (tracker[1] == 0)
+					tracker[1] = 1;
+				else {
+					tracker[0] = tracker[0]+1;
+					tracker[1] = 0;
+				}
+			}
+			else
+				erroEnderecoInvalido();
+		}
+		else if (!strcmp(op, "subabs")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			/*Isola o valor dentro de M(), e analisa*/
+			if (tracker[0] < 1024) {
+				if (tracker[1] == 0)
+					tracker[1] = 1;
+				else {
+					tracker[0] = tracker[0]+1;
+					tracker[1] = 0;
+				}
+			}
+			else
+				erroEnderecoInvalido();
+		}
+		else if (!strcmp(op, "mul")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			/*Isola o valor dentro de M(), e analisa*/
+			if (tracker[0] < 1024) {
+				if (tracker[1] == 0)
+					tracker[1] = 1;
+				else {
+					tracker[0] = tracker[0]+1;
+					tracker[1] = 0;
+				}
+			}
+			else
+				erroEnderecoInvalido();
+		}
+		else if (!strcmp(op, "div")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			/*Isola o valor dentro de M(), e analisa*/
+			if (tracker[0] < 1024) {
+				if (tracker[1] == 0)
+					tracker[1] = 1;
+				else {
+					tracker[0] = tracker[0]+1;
+					tracker[1] = 0;
+				}
+			}
+			else
+				erroEnderecoInvalido();
+		}
+		else if (!strcmp(op, "lsh")) {
+			if (tracker[0] < 1024) {
+				if (tracker[1] == 0)
+					tracker[1] = 1;
+				else {
+					tracker[0] = tracker[0]+1;
+					tracker[1] = 0;
+				}
+			}
+			else
+				erroEnderecoInvalido();
+		}
+		else if (!strcmp(op, "rsh")) {
+			if (tracker[0] < 1024) {
+				if (tracker[1] == 0)
+					tracker[1] = 1;
+				else {
+					tracker[0] = tracker[0]+1;
+					tracker[1] = 0;
+				}
+			}
+			else
+				erroEnderecoInvalido();
+		}
+		else if (!strcmp(op, "stm")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			/*Isola o valor dentro de M(), e analisa, podendo haver 8:19 ou 28:39*/
+			if (tracker[0] < 1024) {
+				if (tracker[1] == 0)
+					tracker[1] = 1;
+				else {
+					tracker[0] = tracker[0]+1;
+					tracker[1] = 0;
+				}
+			}
+			else
+				erroEnderecoInvalido();
+		}
+		else
+			erroSintaxe();
+	}
+	else {
+		if (!strcmp(op, "ldmq")) {
+			if (tracker[1] == 0)
+				tracker[1] = 1;
+			else {
+				tracker[0] = tracker[0]+1;
+				tracker[1] = 0;
+			}
+		}
+		else if (!strcmp(op, "ldmqm")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			
+			if (tracker[1] == 0)
+				tracker[1] = 1;
+			else {
+				tracker[0] = tracker[0]+1;
+				tracker[1] = 0;
+			}
+		}
+		else if (!strcmp(op, "str")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			
+			if (tracker[1] == 0)
+				tracker[1] = 1;
+			else {
+				tracker[0] = tracker[0]+1;
+				tracker[1] = 0;
+			}
+		}
+		else if (!strcmp(op, "load")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			
+			if (tracker[1] == 0)
+				tracker[1] = 1;
+			else {
+				tracker[0] = tracker[0]+1;
+				tracker[1] = 0;
+			}
+		}
+		else if (!strcmp(op, "ldn")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			
+			if (tracker[1] == 0)
+				tracker[1] = 1;
+			else {
+				tracker[0] = tracker[0]+1;
+				tracker[1] = 0;
+			}
+		}
+		else if (!strcmp(op, "ldabs")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			
+			if (tracker[1] == 0)
+				tracker[1] = 1;
+			else {
+				tracker[0] = tracker[0]+1;
+				tracker[1] = 0;
+			}
+		}
+		else if (!strcmp(op, "jmp")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			
+			if (tracker[1] == 0)
+				tracker[1] = 1;
+			else {
+				tracker[0] = tracker[0]+1;
+				tracker[1] = 0;
+			}
+		}
+		else if (!strcmp(op, "jgez")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			
+			if (tracker[1] == 0)
+				tracker[1] = 1;
+			else {
+				tracker[0] = tracker[0]+1;
+				tracker[1] = 0;
+			}
+		}
+		else if (!strcmp(op, "add")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			
+			if (tracker[1] == 0)
+				tracker[1] = 1;
+			else {
+				tracker[0] = tracker[0]+1;
+				tracker[1] = 0;
+			}
+		}
+		else if (!strcmp(op, "addabs")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			
+			if (tracker[1] == 0)
+				tracker[1] = 1;
+			else {
+				tracker[0] = tracker[0]+1;
+				tracker[1] = 0;
+			}
+		}
+		else if (!strcmp(op, "sub")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			
+			if (tracker[1] == 0)
+				tracker[1] = 1;
+			else {
+				tracker[0] = tracker[0]+1;
+				tracker[1] = 0;
+			}
+		}
+		else if (!strcmp(op, "subabs")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			
+			if (tracker[1] == 0)
+				tracker[1] = 1;
+			else {
+				tracker[0] = tracker[0]+1;
+				tracker[1] = 0;
+			}
+		}
+		else if (!strcmp(op, "mul")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			
+			if (tracker[1] == 0)
+				tracker[1] = 1;
+			else {
+				tracker[0] = tracker[0]+1;
+				tracker[1] = 0;
+			}
+		}
+		else if (!strcmp(op, "div")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			
+			if (tracker[1] == 0)
+				tracker[1] = 1;
+			else {
+				tracker[0] = tracker[0]+1;
+				tracker[1] = 0;
+			}
+		}
+		else if (!strcmp(op, "lsh")) {
+			if (tracker[1] == 0)
+				tracker[1] = 1;
+			else {
+				tracker[0] = tracker[0]+1;
+				tracker[1] = 0;
+			}
+		}
+		else if (!strcmp(op, "rsh")) {
+			if (tracker[1] == 0)
+				tracker[1] = 1;
+			else {
+				tracker[0] = tracker[0]+1;
+				tracker[1] = 0;
+			}
+		}
+		else if (!strcmp(op, "stm")) {
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			
+			if (tracker[1] == 0)
+				tracker[1] = 1;
+			else {
+				tracker[0] = tracker[0]+1;
+				tracker[1] = 0;
+			}
+		}
+		else
+			erroSintaxe();
+	}
+}
+
 void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL, primeira passada, senao segunda */
 	char *token;
 	char nomeConst[101];
@@ -117,6 +563,7 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 				erroSintaxe();
 			else {
 				token = strtok(NULL, " \n");
+				token = convertToLower(token);
 				tipo = confereNumeroNome(token);
 				/*Caso seja um nome, tratar na lista de pendencias*/
 				if (tracker[0] > 1023)
@@ -129,9 +576,11 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 				erroSintaxe();
 			else {
 				token = strtok(NULL, " \n");
+				token = convertToLower(token);
 				tipo = confereNumeroNome(token);
 				/*Trata o primeiro argumento de wfill e coloca em n*/
 				token = strtok(NULL, " \n");
+				token = convertToLower(token);
 				tipo = confereNumeroNome(token);
 				/*Caso seja um nome, tratar na lista de pendencias*/
 				for (i = 0; i < n; i++)
@@ -142,6 +591,7 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		}
 		else if(!strcmp(dir, ".org")) {
 			token = strtok(NULL, " \n");
+			token = convertToLower(token);
 			tipo = confereNumeroNome(token);
 			/*Trata o numero e coloca em n*/
 			tracker[0] = n;
@@ -149,6 +599,7 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		}
 		else if(!strcmp(dir, ".align")) {
 			token = strtok(NULL, " \n");
+			token = convertToLower(token);
 			tipo = confereNumeroNome(token);
 			/*Trata o numero e coloca em n*/
 			if (tracker[1] == 1) {
@@ -162,6 +613,7 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		}
 		else if(!strcmp(dir, ".set")) {
 			token = strtok(NULL, " \n");
+			token = convertToLower(token);
 			tipo = confereNumeroNome(token);
 			if (tipo != 0)
 				erroSintaxe();
@@ -172,6 +624,7 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 			confereConflitoNome(nomeConst);
 			conferePendentes(nomeConst, 1);
 			token = strtok(NULL, " \n");
+			token = convertToLower(token);
 			tipo = confereNumeroNome(token);
 			/*Trata o numero e coloca em n*/
 			armazenaConstante(nomeConst, n);
@@ -182,6 +635,7 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 	else {
 		if (!strcmp(dir, ".word")) {
 			token = strtok(NULL, " \n");
+			token = convertToLower(token);
 			tipo = confereNumeroNome(token);
 			if (tipo == 0) {
 				/*Busca nas listas de nomes e devolve o valor em val*/
@@ -194,9 +648,11 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		}
 		else if(!strcmp(dir, ".wfill")) {
 			token = strtok(NULL, " \n");
+			token = convertToLower(token);
 			tipo = confereNumeroNome(token);
 			/*Converte para int e coloca em n*/
 			token = strtok(NULL, " \n");
+			token = convertToLower(token);
 			tipo = confereNumeroNome(token);
 			if (tipo == 0) {
 				/*Busca nas listas de nomes e devolve o valor em val*/
@@ -211,6 +667,7 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		}
 		else if(!strcmp(dir, ".org")) {
 			token = strtok(NULL, " \n");
+			token = convertToLower(token);
 			tipo = confereNumeroNome(token);
 			/*Converte o numero e coloca em n*/
 			tracker[0] = n;
@@ -218,6 +675,7 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		}
 		else if(!strcmp(dir, ".align")) {
 			token = strtok(NULL, " \n");
+			token = convertToLower(token);
 			tipo = confereNumeroNome(token);
 			/*Converte o numero e coloca em n*/
 			if (tracker[1] == 1) {
@@ -302,12 +760,14 @@ void primeiraPassada(FILE * arquivoEntrada) {
 				wholeLine = false;
 				
 			token = strtok(inputLine, " \n");
+			token = convertToLower(token);
 			while (token != NULL) {
 				if (token[strlen(token)-1] == ':') { /*Label*/
 					if (!readLabel && !readDirective && !readOperation) {
 						armazenaLabel(token);
 						readLabel = true;
 						token = strtok(NULL, " \n");
+						token = convertToLower(token);
 					}
 					else
 						erroSintaxe();
@@ -318,6 +778,7 @@ void primeiraPassada(FILE * arquivoEntrada) {
 						analisaDiretiva(token, NULL);
 						readDirective = true;
 						token = strtok(NULL, " \n");
+						token = convertToLower(token);
 					}
 					else
 						erroSintaxe();
@@ -342,6 +803,7 @@ void primeiraPassada(FILE * arquivoEntrada) {
 						analisaInstrucao(token, NULL);
 						readOperation = true;
 						token = strtok(NULL, " \n");
+						token = convertToLower(token);
 					}
 					else
 						erroSintaxe();
@@ -367,9 +829,11 @@ void segundaPassada(FILE * arquivoEntrada, FILE * arquivoSaida) {
 				wholeLine = false;
 				
 			token = strtok(inputLine, " \n");
+			token = convertToLower(token);
 			while (token != NULL) {
 				if (token[strlen(token)-1] == ':') /*Label*/
 					token = strtok(NULL, " \n");
+					token = convertToLower(token);
 				
 				else if (token[0] == '.') { /*Diretiva*/
 					analisaDiretiva(token, arquivoSaida);
