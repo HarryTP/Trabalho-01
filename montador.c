@@ -33,7 +33,7 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { return; }; /* Se arquivoSa
 
 void erroSintaxe() { 
 		printf("Entrou em erroSintaxe\n");
-		exit();
+		exit(0);
 };
 void confereUsoLabels() { return; };
 void conferePendentes(char nome[101], int tipo) { return; }; /*Procura na lista de pendencias e remove, tipo 0 para label e tipo 1 para constante*/
@@ -96,7 +96,7 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 	
 	if (arquivoSaida == NULL) {
 		switch (dir) {
-			case .word:
+			case ".word":
 				if (tracker[1] == 1)
 					erroSintaxe();
 				else {
@@ -147,7 +147,7 @@ void armazenaLabel(char *label) {
 	}
 	
 	/* Confere pendencias */
-	conferePendentes(newLabel.nome);
+	conferePendentes(newLabel.nome, 0);
 }
 
 
@@ -280,7 +280,7 @@ int main(int argc, char *argv[]) {
 	/* Inicializacao de variaveis*/
 	if (argc < 2 || argc > 3) {
 		printf("ERRO: Insira apenas um ou dois argumentos, correspondentes a, respectivamente, o nome do arquivo de entrada e (opcionalmente) o nome do arquivo de saida.\n");
-		exit(1);
+		exit(0);
 	}
 	else if (argc == 2) {
 		arquivoEntrada = fopen(argv[1], "r");
