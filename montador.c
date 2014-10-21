@@ -31,13 +31,20 @@ int tracker[2] = {0, 0};
 
 void analisaInstrucao(char *op, FILE *arquivoSaida) { return; }; /* Se arquivoSaida = NULL, primeira passada, senao segunda */
 
-void erroEnderecoInvalido() { return; };
+void erroEnderecoInvalido() {
+	printf("Entrou em erroEnderecoInvalido\n");
+	exit(1);
+}
 void erroSintaxe() { 
-		printf("Entrou em erroSintaxe\n");
-		exit(1);
+	printf("Entrou em erroSintaxe\n");
+	exit(1);
+}
+void erroUsoNome() { 
+	printf("Entrou em erroUsoNome\n");
+	exit(1);
 }
 
-void confereUsoLabels() { return; };
+/*void confereUsoLabels() { return; };*/
 void armazenaConstante(char nome[101], int valor) { return; };
 void confereConflitoNome(char *nome) { return; }; /*Confere se um nome ja nao foi usado*/
 void conferePendentes(char nome[101], int tipo) { return; }; /*Procura na lista de pendencias e remove, tipo 0 para label e tipo 1 para constante*/
@@ -53,7 +60,7 @@ int confereNumeroNome(char *valor) { /*Testa se o numero ou nome eh valido*/
 	int i;
 	
 	switch(valor[0]) {
-		/* Numero em base =/= 0 */
+		/* Numero em base =/= 10 */
 		case '0':
 			/* Hexadecimal */
 			if (valor[1] == 'x' || valor[1] == 'X') {
@@ -102,6 +109,7 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 	int tipo;
 	int n;
 	int i;
+	int val;
 	
 	if (arquivoSaida == NULL) {
 		if (!strcmp(dir, ".word")) {
@@ -122,7 +130,7 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 			else {
 				token = strtok(NULL, " \n");
 				tipo = confereNumeroNome(token);
-				/*Trata o primeiro argumento de wfill (n)*/
+				/*Trata o primeiro argumento de wfill e coloca em n*/
 				token = strtok(NULL, " \n");
 				tipo = confereNumeroNome(token);
 				/*Caso seja um nome, tratar na lista de pendencias*/
@@ -158,8 +166,8 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 			if (tipo != 0)
 				erroSintaxe();
 			else {
-			strncpy(nomeConst, token, strlen(token))
-			nomeConst[strlen(token)] = '\0';
+				strncpy(nomeConst, token, strlen(token))
+				nomeConst[strlen(token)] = '\0';
 			}
 			confereConflitoNome(nomeConst);
 			conferePendentes(nomeConst, 1);
@@ -167,6 +175,64 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 			tipo = confereNumeroNome(token);
 			/*Trata o numero e coloca em n*/
 			armazenaConstante(nomeConst, n);
+		}
+		else
+			erroSintaxe();
+	}
+	else {
+		if (!strcmp(dir, ".word")) {
+			token = strtok(NULL, " \n");
+			tipo = confereNumeroNome(token);
+			if (tipo == 0) {
+				/*Busca nas listas de nomes e devolve o valor em val*/
+			}
+			else {
+				/*Converte para int e coloca em val*/
+			}
+			/*Imprime val no arquivo*/
+			tracker[0] = tracker[0]+1;
+		}
+		else if(!strcmp(dir, ".wfill")) {
+			token = strtok(NULL, " \n");
+			tipo = confereNumeroNome(token);
+			/*Converte para int e coloca em n*/
+			token = strtok(NULL, " \n");
+			tipo = confereNumeroNome(token);
+			if (tipo == 0) {
+				/*Busca nas listas de nomes e devolve o valor em val*/
+			}
+			else {
+				/*Converte para int e coloca em val*/
+			}
+			for (i = 0; i < n; i++) {
+				/*Imprime val no arquivo*/
+				tracker[0] = tracker[0]+1;
+			}
+		}
+		else if(!strcmp(dir, ".org")) {
+			token = strtok(NULL, " \n");
+			tipo = confereNumeroNome(token);
+			/*Converte o numero e coloca em n*/
+			tracker[0] = n;
+			tracker[1] = 0;
+		}
+		else if(!strcmp(dir, ".align")) {
+			token = strtok(NULL, " \n");
+			tipo = confereNumeroNome(token);
+			/*Converte o numero e coloca em n*/
+			if (tracker[1] == 1) {
+				/*Imprime 0s*/
+				tracker[0] = tracker[0]+1;
+				tracker[1] = 0;
+			}
+			while (tracker[0]%n) {
+				/*Imprime 0s*/
+				tracker[0] = tracker[0]+1;
+			}
+		}
+		else if(!strcmp(dir, ".set")) {
+			token = strtok(NULL, " \n");
+			token = strtok(NULL, " \n");
 		}
 		else
 			erroSintaxe();
@@ -193,19 +259,16 @@ void armazenaLabel(char *label) {
 			erroSintaxe();
 	}
 	
-	/*confereNumeroNome(nomeTemp); <- poderia ser usada no lugar do pedaço de cima. */
-	confereConflitoNome(nomeTemp);
+	i = confereNumeroNome(nomeTemp);
+	if (i != 0)
+		erroSintaxe;
+	else
+		confereConflitoNome(nomeTemp);
 	
 	/* Seta a nova variavel */
 	strcpy(newLabel.nome, nomeTemp);
-	if (tracker[1] == 1) {
-		newLabel.endereco[0] = tracker[0]+1;
-		newLabel.endereco[1] = 0;
-	}
-	else {
-		newLabel.endereco[0] = tracker[0];
-		newLabel.endereco[1] = 1;
-	}
+	newLabel.endereco[0] = tracker[0];
+	newLabel.endereco[1] = tracker[1];
 	newLabel.next = NULL;
 	
 	/* Concatena na lista */
@@ -286,6 +349,9 @@ void primeiraPassada(FILE * arquivoEntrada) {
 			}
 		}
 	}
+	
+	if (comecoPend != NULL)
+		erroUsoNome();
 }
 
 void segundaPassada(FILE * arquivoEntrada, FILE * arquivoSaida) {
@@ -354,7 +420,11 @@ int main(int argc, char *argv[]) {
 		printf("ERRO: Insira apenas um ou dois argumentos, correspondentes a, respectivamente, o nome do arquivo de entrada e (opcionalmente) o nome do arquivo de saida.\n");
 		exit(1);
 	}
-	else if (argc == 2) {
+	
+	/*Execucao principal */
+	primeiraPassada(arquivoEntrada);
+	
+	if (argc == 2) {
 		arquivoEntrada = fopen(argv[1], "r");
 		nomeTemp = (char*) malloc(sizeof(argv[1])+(sizeof(char)*4)); /* Tamanho suficiente para nome do arquivo principal + .hex */
 		strcpy(nomeTemp, argv[1]);
@@ -367,8 +437,6 @@ int main(int argc, char *argv[]) {
 		arquivoSaida = fopen(argv[2], "w");
 	}
 	
-	/*Execucao principal */
-	primeiraPassada(arquivoEntrada);
 	rewind(arquivoEntrada);
 	tracker[0] = 0;
 	tracker[1] = 0;
