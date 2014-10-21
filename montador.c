@@ -94,11 +94,16 @@ void armazenaLabel(char *label) {
 	else {
 		finalLabels->next = &newLabel;
 		finalLabels = &newLabel;
+<<<<<<< HEAD
 	}
 	
 	/* Confere pendencias */
 	conferePendentes(newLabel.nome);
 }
+=======
+	}	
+}
+>>>>>>> origin/master
 
 void primeiraPassada(FILE * arquivoEntrada) {
 	char inputLine[1000];
@@ -255,4 +260,3 @@ int main(int argc, char *argv[]) {
 	fclose(arquivoSaida);
 	return 0;
 }
-
