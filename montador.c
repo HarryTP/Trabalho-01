@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 struct Label {
 	char nome[101];
@@ -30,10 +31,65 @@ int tracker[2] = {0, 0};
 
 void analisaInstrucao(char *op, FILE *arquivoSaida) { return; }; /* Se arquivoSaida = NULL, primeira passada, senao segunda */
 
-void erroSintaxe() { return; };
+void erroSintaxe() { 
+		printf("Entrou em erroSintaxe\n");
+		exit();
+};
 void confereUsoLabels() { return; };
 void conferePendentes(char nome[101], int tipo) { return; }; /*Procura na lista de pendencias e remove, tipo 0 para label e tipo 1 para constante*/
-void confereNumeroNome(char *valor) { return; }; /*Testa se o numero ou nome eh valido*/
+int confereNumeroNome(char *valor) { /*Testa se o numero ou nome eh valido*/
+	/* Codigos de retorno:
+	 * 0 - Nome
+	 * 1 - Binario
+	 * 2 - Octal
+	 * 3 - Decimal
+	 * 4 - Hexa
+	 */
+	int i;
+	
+	switch(valor[0]) {
+		/* Numero em base =/= 0 */
+		case '0':
+			/* Hexadecimal */
+			if (valor[1] == 'x' || valor[1] == 'X') {
+				for (i = 2; i < strlen(valor); i++)
+					if ( ! (valor[i] == '0' || valor[i] == '1' || valor[i] == '2' || valor[i] == '3' || valor[i] == '4' || valor[i] == '5' || valor[i] == '6' || valor[i] == '7' || valor[i] == '8' || valor[i] == '9' || valor[i] == 'A' || valor[i] == 'B' || valor[i] == 'C' || valor[i] == 'D' || valor[i] == 'E' || valor[i] == 'F') )
+						erroSintaxe();
+				return 4;
+			}
+			/* Octal */
+			if (valor[1] == 'o' || valor[1] == 'O') {
+				for (i = 2; i < strlen(valor); i++)
+					if (! (valor[i] == '0' || valor[i] == '1' || valor[i] == '2' || valor[i] == '3' || valor[i] == '4' || valor[i] == '5' || valor[i] == '6' || valor[i] == '7') )
+						erroSintaxe();
+				return 2;
+			}
+			/* Binario */
+			if (valor[1] == 'b' || valor[1] == 'B') {
+				for (i = 2; i < strlen(valor); i++)
+					if ( !(valor[i] == '0' || valor[i] == '1') )
+						erroSintaxe();
+				return 1;
+			}
+			else
+				erroSintaxe();
+		/* Numero em base decimal */
+		case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+			for (i = 0; i < strlen(valor); i++)
+				if (! (valor[i] == '0' || valor[i] == '1' || valor[i] == '2' || valor[i] == '3' || valor[i] == '4' || valor[i] == '5' || valor[i] == '6' || valor[i] == '7' || valor[i] == '8' || valor[i] == '9') )
+					erroSintaxe();
+			return 3;
+		/* Nome */
+		default:
+			if (strlen(valor) > 100)
+				erroSintaxe();
+			for (i = 0; i < strlen(valor); i++) {
+				if ( !isalpha(valor[i]) && !(valor[i] == '_') )
+					erroSintaxe();
+			}
+			return 0;
+	}
+} 
 
 void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL, primeira passada, senao segunda */
 	char *token;
@@ -66,13 +122,7 @@ void armazenaLabel(char *label) {
 	strncpy (nomeTemp, label, strlen(label)-1);
 	nomeTemp[strlen(label)] = '\0';
 	
-	/* Analise de sintaxe */
-	for (i = 0; i < strlen(nomeTemp); i++) {
-		if ( !isalpha(nomeTemp[i]) && !(nomeTemp[i] == '_') )
-			erroSintaxe();
-	}
-	
-	/*confereNumeroConstante(label); <- poderia ser usada no lugar do pedaço de cima. */
+	confereNumeroConstante(nomeTemp);
 	
 	/* Seta a nova variavel */
 	strcpy(newLabel.nome, nomeTemp);
