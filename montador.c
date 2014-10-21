@@ -9,18 +9,49 @@ struct Label {
 	struct Label * next;
 };
 
+struct Const {
+	char nome[101];
+	int valor;
+	struct Const * next;
+};
+
+struct Pend {
+	char nome[101];
+	struct Pend * next;
+};
+
 struct Label *comecoLabels = NULL;
 struct Label *finalLabels = NULL;
-/*struct Const * comecoConst = NULL;
-struct Const * finalConst = NULL;*/
+struct Const *comecoConst = NULL;
+struct Const *finalConst = NULL;
+struct Pend *comecoPend = NULL;
+struct Pend *finalPend = NULL;
 int tracker[2] = {0, 0};
 
-void analisaDiretiva(char *dir, FILE *arquivoSaida) { return; }; /* Se arquivoSaida = NULL, primeira passada, senao segunda */
 void analisaInstrucao(char *op, FILE *arquivoSaida) { return; }; /* Se arquivoSaida = NULL, primeira passada, senao segunda */
 
 void erroSintaxe() { return; };
 void confereUsoLabels() { return; };
-void conferePendentes() { return; };
+void conferePendentes(char nome[101], int tipo) { return; }; /*Procura na lista de pendencias e remove, tipo 0 para label e tipo 1 para constante*/
+void confereNumeroNome(char *valor) { return; }; /*Testa se o numero ou nome eh valido*/
+
+void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL, primeira passada, senao segunda */
+	char *token;
+	
+	if (arquivoSaida == NULL) {
+		switch (dir) {
+			case .word:
+				if (tracker[1] == 1)
+					erroSintaxe();
+				else {
+					token = strtok(NULL, " \n");
+					confereNumeroConstante(token);
+					tracker[0] = tracker[0]+1;
+				}
+		}
+	}
+}
+
 
 void armazenaLabel(char *label) { 
 	struct Label newLabel;
@@ -40,6 +71,8 @@ void armazenaLabel(char *label) {
 		if ( !isalpha(nomeTemp[i]) && !(nomeTemp[i] == '_') )
 			erroSintaxe();
 	}
+	
+	/*confereNumeroConstante(label); <- poderia ser usada no lugar do pedaço de cima. */
 	
 	/* Seta a nova variavel */
 	strcpy(newLabel.nome, nomeTemp);
@@ -61,7 +94,10 @@ void armazenaLabel(char *label) {
 	else {
 		finalLabels->next = &newLabel;
 		finalLabels = &newLabel;
-	}	
+	}
+	
+	/* Confere pendencias */
+	conferePendentes(newLabel.nome);
 }
 
 void primeiraPassada(FILE * arquivoEntrada) {
@@ -127,9 +163,6 @@ void primeiraPassada(FILE * arquivoEntrada) {
 			}
 		}
 	}
-	
-	conferePendentes();/*Conferir se nenhuma label foi usada sem ter sido declarada, ou se alguma constante
-	foi usada antes de ser declarada*/
 }
 
 void segundaPassada(FILE * arquivoEntrada, FILE * arquivoSaida) {
