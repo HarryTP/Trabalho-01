@@ -74,7 +74,7 @@ int confereNumeroNome(char *valor) { /*Testa se o numero ou nome eh valido*/
 			/* Hexadecimal */
 			if (valor[1] == 'x') {
 				for (i = 2; i < strlen(valor); i++)
-					if ( ! (valor[i] == '0' || valor[i] == '1' || valor[i] == '2' || valor[i] == '3' || valor[i] == '4' || valor[i] == '5' || valor[i] == '6' || valor[i] == '7' || valor[i] == '8' || valor[i] == '9' || valor[i] == 'A' || valor[i] == 'B' || valor[i] == 'C' || valor[i] == 'D' || valor[i] == 'E' || valor[i] == 'F') )
+					if ( ! (valor[i] == '0' || valor[i] == '1' || valor[i] == '2' || valor[i] == '3' || valor[i] == '4' || valor[i] == '5' || valor[i] == '6' || valor[i] == '7' || valor[i] == '8' || valor[i] == '9' || valor[i] == 'a' || valor[i] == 'b' || valor[i] == 'c' || valor[i] == 'd' || valor[i] == 'e' || valor[i] == 'f') )
 						erroSintaxe();
 				return 4;
 			}
@@ -711,15 +711,9 @@ void armazenaLabel(char *label) {
 	strncpy (nomeTemp, label, strlen(label)-1);
 	nomeTemp[strlen(label)-1] = '\0';
 	
-	/* Analise de sintaxe */
-	for (i = 0; i < strlen(nomeTemp); i++) {
-		if ( !isalpha(nomeTemp[i]) && !(nomeTemp[i] == '_') )
-			erroSintaxe();
-	}
-	
 	i = confereNumeroNome(nomeTemp);
 	if (i != 0)
-		erroSintaxe;
+		erroSintaxe();
 	else
 		confereConflitoNome(nomeTemp);
 	
@@ -831,9 +825,10 @@ void segundaPassada(FILE * arquivoEntrada, FILE * arquivoSaida) {
 			token = strtok(inputLine, " \n");
 			token = convertToLower(token);
 			while (token != NULL) {
-				if (token[strlen(token)-1] == ':') /*Label*/
+				if (token[strlen(token)-1] == ':') { /*Label*/
 					token = strtok(NULL, " \n");
 					token = convertToLower(token);
+				}
 				
 				else if (token[0] == '.') { /*Diretiva*/
 					analisaDiretiva(token, arquivoSaida);
