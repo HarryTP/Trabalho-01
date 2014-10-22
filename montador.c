@@ -42,57 +42,127 @@ void erroUsoNome() {
 	exit(1);
 }
 
-/*void confereUsoLabels() { return; };*/
-void confereConflitoNome(char *nome) { return; }; /*Confere se um nome ja nao foi usado*/
+void armazenaPendencia(char *nome) {
+	struct Label * label = NULL;
+	struct Const * set = NULL;
+	struct Pend * pend = NULL;
+	struct Pend * newPend;
+	
+	label = comecoLabels;
+	while (label) {
+		if (!strcmp(label->nome, nome))
+			return;
+		else
+			label = label->next;
+	}
+	
+	set = comecoConst;
+	while (set) {
+		if (!strcmp(set->nome, nome))
+			return;
+		else
+			set = set->next;
+	}
+	
+	if (comecoPend == NULL) {
+		newPend = malloc(sizeof(struct Pend));
+		
+		newPend->nome = nome;
+		newPend->next = NULL;
+		
+		comecoPend = newPend;
+		finalPend = newPend;
+	}
+	else {
+		pend = comecoPend;
+		while (pend) {
+			if (!strcmp(pend->nome, nome))
+				return;
+			else
+				pend = pend->next;
+		}
+		
+		newPend = malloc(sizeof(struct Pend));
+		
+		newPend->nome = nome;
+		newPend->next = NULL;
+		
+		finalPend->next = newPend;
+		finalPend = newPend;
+	}
+}
+
+void confereConflitoNome(char *nome) { /*Confere se um nome ja nao foi usado*/
+	struct Label * label = NULL;
+	struct Const * set = NULL;
+	
+	label = comecoLabels;
+	while (label) {
+		if (!strcmp(label->nome, nome))
+			erroUsoNome();
+		else
+			label = label->next;
+	}
+	
+	set = comecoConst;
+	while (set) {
+		if (!strcmp(set->nome, nome))
+			erroUsoNome();
+		else
+			set = set->next;
+	}
+}
+
 void conferePendentes(char nome[101], int tipo) { /*Procura na lista de pendencias e remove*/ 
-	/* Tipo 0 == Label
-	 * Tipo 1 == Constante
-	 */
+	/*  Tipo 0 = Label
+		Tipo 1 = Constante */
 	 
 	 struct Pend * last = NULL;
 	 struct Pend * current = NULL;
 	 
+	current = comecoPend;
+	 
 	if (tipo == 0) { 
-		if (comecoPend == NULL)
-			return;
-		else {
-			current = comecoPend;
-			while (current) {
-				if ( !strcmp(pointer->nome, nome) ) {
-					if (comecoPend == finalPend && current == comecoPend) { /* Lista com 1 elemento */
-						comecoPend = NULL;
-						finalPend = NULL;
-						free(current);
-						return;
-					}
-					else if (current == comecoPend) { /* Primeiro em lista > 1 */
-						comecoPend = comecoPend->next;
-						free(current);
-						return;
-					}
-					else if (current == finalPend) { /* Ultimo elemento em lista > 1 */
-						finalPend = last;
-						finalPend->next = NULL;
-						free(current);
-						return;
-					}
-					else { /* Caso geral: meio da lista */
-						last->next = current->next;
-						free(current);
-						return;
-					}
+		while (current) {
+			if ( !strcmp(current->nome, nome) ) {
+				if (comecoPend == finalPend && current == comecoPend) { /* Lista com 1 elemento */
+					comecoPend = NULL;
+					finalPend = NULL;
+					free(current);
+					return;
 				}
-				else {
-					last = current;
-					current = current->next;
+				else if (current == comecoPend) { /* Primeiro em lista > 1 */
+					comecoPend = comecoPend->next;
+					free(current);
+					return;
 				}
+				else if (current == finalPend) { /* Ultimo elemento em lista > 1 */
+					finalPend = last;
+					finalPend->next = NULL;
+					free(current);
+					return;
+				}
+				else { /* Caso geral: meio da lista */
+					last->next = current->next;
+					free(current);
+					return;
+				}
+			}
+			else {
+				last = current;
+				current = current->next;
 			}
 		}
 	}
 	
-	if (tipo == 1) {
-		/* TO DO */
-	}	
+	else if (tipo == 1) {
+		while (current) {
+			if (!strcmp(current->nome, nome))
+				erroUsoNome();
+			else
+				current = current->next;
+		}
+	}
 }
 
 char * convertToLower(char *str) {
@@ -157,6 +227,28 @@ int confereNumeroNome(char *valor) { /*Testa se o numero ou nome eh valido*/
 					erroSintaxe();
 			}
 			return 0;
+	}
+}
+
+void armazenaConstante(char nome[101], int valor) { 
+	struct Const * newConst;
+	int i;
+	
+	newConst = malloc(sizeof(struct Const));
+		
+	/* Seta a nova variavel */
+	strcpy(newConst->nome, nome);
+	newConst->valor = valor;
+	newConst->next = NULL;
+	
+	/* Concatena na lista */
+	if (comecoConst == NULL) {
+		comecoConst = newConst;
+		finalConst = newConst;
+	}
+	else {
+		finalConst->next = newConst;
+		finalConst = newConst;
 	}
 }
 
@@ -745,7 +837,6 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 	}
 }
 
-
 void armazenaLabel(char *label) { 
 	struct Label * newLabel;
 	char nomeTemp[101] = "";
@@ -786,29 +877,6 @@ void armazenaLabel(char *label) {
 	/* Confere pendencias */
 	conferePendentes(newLabel->nome, 0);
 }
-
-void armazenaConstante(char nome[101], int valor) { 
-	struct Const * newConst;
-	int i;
-	
-	newConst = malloc(sizeof(struct Const));
-		
-	/* Seta a nova variavel */
-	strcpy(newConst->nome, nome);
-	newConst->valor = valor;
-	newConst->next = NULL;
-	
-	/* Concatena na lista */
-	if (comecoConst == NULL) {
-		comecoConst = newConst;
-		finalConst = newConst;
-	}
-	else {
-		finalConst->next = newConst;
-		finalConst = newConst;
-	}
-}
-
 
 void primeiraPassada(FILE * arquivoEntrada) {
 	char inputLine[1000];
