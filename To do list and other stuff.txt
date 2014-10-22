@@ -1,13 +1,6 @@
 confereNumeroNome = lidar com negativo, 0 em decimal
 
-listas ligadas = conferir se funciona sem usar malloc, acho que não
-
 conversão de string pra int = lidar com negativo e 0 em todas as bases
 
 Aumento de eficiência = fazer uma função parecida com a confereNumeroNome,
 que não confere tudo, só retorna a base/tipo do valor mais rapidamente, para ser usada na segunda passada
-
-Pergunta: E se o cara tentar sobreescrever o próprio código?
-
-Duvida: Pode-se usar constantes definidas pelo .set nos comandos?
-Pelo que dá pra entender do enunciado e pelos exemplos que tem lá não

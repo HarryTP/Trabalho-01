@@ -43,9 +43,57 @@ void erroUsoNome() {
 }
 
 /*void confereUsoLabels() { return; };*/
-void armazenaConstante(char nome[101], int valor) { return; };
 void confereConflitoNome(char *nome) { return; }; /*Confere se um nome ja nao foi usado*/
-void conferePendentes(char nome[101], int tipo) { return; }; /*Procura na lista de pendencias e remove, tipo 0 para label e tipo 1 para constante*/
+void conferePendentes(char nome[101], int tipo) { /*Procura na lista de pendencias e remove*/ 
+	/* Tipo 0 == Label
+	 * Tipo 1 == Constante
+	 */
+	 
+	 struct Pend * last = NULL;
+	 struct Pend * current = NULL;
+	 
+	if (tipo == 0) { 
+		if (comecoPend == NULL)
+			return;
+		else {
+			current = comecoPend;
+			while (current) {
+				if ( !strcmp(pointer->nome, nome) ) {
+					if (comecoPend == finalPend && current == comecoPend) { /* Lista com 1 elemento */
+						comecoPend = NULL;
+						finalPend = NULL;
+						free(current);
+						return;
+					}
+					else if (current == comecoPend) { /* Primeiro em lista > 1 */
+						comecoPend = comecoPend->next;
+						free(current);
+						return;
+					}
+					else if (current == finalPend) { /* Ultimo elemento em lista > 1 */
+						finalPend = last;
+						finalPend->next = NULL;
+						free(current);
+						return;
+					}
+					else { /* Caso geral: meio da lista */
+						last->next = current->next;
+						free(current);
+						return;
+					}
+				}
+				else {
+					last = current;
+					current = current->next;
+				}
+			}
+		}
+	}
+	
+	if (tipo == 1) {
+		/* TO DO */
+	}	
+}
 
 char * convertToLower(char *str) {
 	int i;
@@ -699,9 +747,11 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 
 
 void armazenaLabel(char *label) { 
-	struct Label newLabel;
+	struct Label * newLabel;
 	char nomeTemp[101] = "";
 	int i;
+	
+	newLabel = malloc(sizeof(struct Label));
 	
 	/* Tamanho invalido */
 	if (strlen(label) > 101)
@@ -718,23 +768,45 @@ void armazenaLabel(char *label) {
 		confereConflitoNome(nomeTemp);
 	
 	/* Seta a nova variavel */
-	strcpy(newLabel.nome, nomeTemp);
-	newLabel.endereco[0] = tracker[0];
-	newLabel.endereco[1] = tracker[1];
-	newLabel.next = NULL;
+	strcpy(newLabel->nome, nomeTemp);
+	newLabel->endereco[0] = tracker[0];
+	newLabel->endereco[1] = tracker[1];
+	newLabel->next = NULL;
 	
 	/* Concatena na lista */
 	if (comecoLabels == NULL) {
-		comecoLabels = &newLabel;
-		finalLabels = &newLabel;
+		comecoLabels = newLabel;
+		finalLabels = newLabel;
 	}
 	else {
-		finalLabels->next = &newLabel;
-		finalLabels = &newLabel;
+		finalLabels->next = newLabel;
+		finalLabels = newLabel;
 	}
 	
 	/* Confere pendencias */
-	conferePendentes(newLabel.nome, 0);
+	conferePendentes(newLabel->nome, 0);
+}
+
+void armazenaConstante(char nome[101], int valor) { 
+	struct Label * newConst;
+	int i;
+	
+	newConst = malloc(sizeof(struct Const));
+		
+	/* Seta a nova variavel */
+	strcpy(newLabel->nome, nome);
+	newLabel->valor = valor;
+	newLabel->next = NULL;
+	
+	/* Concatena na lista */
+	if (comecoConst == NULL) {
+		comecoConst = newConst;
+		finalConst = newConst;
+	}
+	else {
+		finalConst->next = newConst;
+		finalConst = newConst;
+	}
 }
 
 
@@ -880,11 +952,16 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 	
+	arquivoEntrada = fopen(argv[1], "r");
+	if (arquivoEntrada == NULL) {
+		printf("ERRO: Arquivo de entrada invalido.\n");
+		exit(1);
+	}
+	
 	/*Execucao principal */
 	primeiraPassada(arquivoEntrada);
 	
 	if (argc == 2) {
-		arquivoEntrada = fopen(argv[1], "r");
 		nomeTemp = (char*) malloc(sizeof(argv[1])+(sizeof(char)*4)); /* Tamanho suficiente para nome do arquivo principal + .hex */
 		strcpy(nomeTemp, argv[1]);
 		strcat(nomeTemp, ".hex");
