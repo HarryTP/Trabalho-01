@@ -120,47 +120,48 @@ void conferePendentes(char nome[101], int tipo) { /*Procura na lista de pendenci
 	 struct Pend * last = NULL;
 	 struct Pend * current = NULL;
 	 
-	current = comecoPend;
-	 
-	if (tipo == 0) { 
-		while (current) {
-			if ( !strcmp(current->nome, nome) ) {
-				if (comecoPend == finalPend && current == comecoPend) { /* Lista com 1 elemento */
-					comecoPend = NULL;
-					finalPend = NULL;
-					free(current);
-					return;
+	if (comecoPend != NULL) {
+		current = comecoPend;
+		if (tipo == 0) { 
+			while (current) {
+				if ( !strcmp(current->nome, nome) ) {
+					if (comecoPend == finalPend && current == comecoPend) { /* Lista com 1 elemento */
+						comecoPend = NULL;
+						finalPend = NULL;
+						free(current);
+						return;
+					}
+					else if (current == comecoPend) { /* Primeiro em lista > 1 */
+						comecoPend = comecoPend->next;
+						free(current);
+						return;
+					}
+					else if (current == finalPend) { /* Ultimo elemento em lista > 1 */
+						finalPend = last;
+						finalPend->next = NULL;
+						free(current);
+						return;
+					}
+					else { /* Caso geral: meio da lista */
+						last->next = current->next;
+						free(current);
+						return;
+					}
 				}
-				else if (current == comecoPend) { /* Primeiro em lista > 1 */
-					comecoPend = comecoPend->next;
-					free(current);
-					return;
+				else {
+					last = current;
+					current = current->next;
 				}
-				else if (current == finalPend) { /* Ultimo elemento em lista > 1 */
-					finalPend = last;
-					finalPend->next = NULL;
-					free(current);
-					return;
-				}
-				else { /* Caso geral: meio da lista */
-					last->next = current->next;
-					free(current);
-					return;
-				}
-			}
-			else {
-				last = current;
-				current = current->next;
 			}
 		}
-	}
-	
-	else if (tipo == 1) {
-		while (current) {
-			if (!strcmp(current->nome, nome))
-				erroUsoNome();
-			else
-				current = current->next;
+		
+		else if (tipo == 1) {
+			while (current) {
+				if (!strcmp(current->nome, nome))
+					erroUsoNome();
+				else
+					current = current->next;
+			}
 		}
 	}
 }
