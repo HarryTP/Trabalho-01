@@ -618,7 +618,7 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 			if (tipo != 0)
 				erroSintaxe();
 			else {
-				strncpy(nomeConst, token, strlen(token))
+				strncpy(nomeConst, token, strlen(token));
 				nomeConst[strlen(token)] = '\0';
 			}
 			confereConflitoNome(nomeConst);
