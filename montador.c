@@ -788,15 +788,15 @@ void armazenaLabel(char *label) {
 }
 
 void armazenaConstante(char nome[101], int valor) { 
-	struct Label * newConst;
+	struct Const * newConst;
 	int i;
 	
 	newConst = malloc(sizeof(struct Const));
 		
 	/* Seta a nova variavel */
-	strcpy(newLabel->nome, nome);
-	newLabel->valor = valor;
-	newLabel->next = NULL;
+	strcpy(newConst->nome, nome);
+	newConst->valor = valor;
+	newConst->next = NULL;
 	
 	/* Concatena na lista */
 	if (comecoConst == NULL) {
