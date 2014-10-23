@@ -42,6 +42,36 @@ void erroUsoNome() {
 	exit(1);
 }
 
+void imprime(FILE * arquivoSaida, int tipo, long int param, int codigo) {
+	unsigned int mask = 0b1111;
+	int parts[10];
+	int i;
+	
+	if (!tipo) {
+		for (i = 0; i < 10; i++) {
+			parts[i] = param & mask;
+			param = param >> 4;
+		}
+		fprintf(arquivoSaida, "%03X %X%X %X%X%X %X%X %X%X%X\n", tracker[0], parts[9], parts[8], parts[7], parts[6], parts[5], parts[4], parts[3], parts[2], parts[1], parts[0]);
+	}
+	else {
+		for (i = 0; i < 2; i++) {
+			parts[i] = codigo & mask;
+			codigo = codigo >> 4;
+		}
+		for (i = 2; i < 5; i++) {
+			parts[i] = param & mask;
+			param = param >> 4;
+		}
+		if (!tracker[1]) {
+			fprintf(arquivoSaida, "%03X %X%X %X%X%X ", tracker[0], parts[1], parts[0], parts[4], parts[3], parts[2]);
+		}
+		else {
+			fprintf(arquivoSaida, "%X%X %X%X%X\n", parts[1], parts[0], parts[4], parts[3], parts[2]);
+		}
+	}
+}
+
 
 long int converteStringNumero (char * valor, int tipo) { /* Converte um numero, dado na string valor, para um inteiro */
 	/* Tipos:
