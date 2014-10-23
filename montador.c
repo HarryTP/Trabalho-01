@@ -12,7 +12,7 @@ struct Label {
 
 struct Const {
 	char nome[101];
-	int valor;
+	long int valor;
 	struct Const * next;
 };
 
@@ -40,6 +40,38 @@ void erroSintaxe() {
 void erroUsoNome() { 
 	printf("Entrou em erroUsoNome\n");
 	exit(1);
+}
+
+long int converteStringNumero (char * valor, int tipo) { /* Converte um numero, dado na string valor, para um inteiro */
+	/* Tipos:
+	 * 1 - Binario +
+	 * 2 - Binario -
+	 * 3 - Octal +
+	 * 4 - Octal -
+	 * 5 - Decimal +
+	 * 6 - Decimal -
+	 * 7 - Hexa +
+	 * 8 - Hexa -
+	 */
+	long int result;
+	
+	switch (tipo) {
+		case 1:
+			result = strtol(valor+(sizeof(char)*2), NULL, 2);
+		case 2:
+			result = strtol(valor+(sizeof(char)*3), NULL, 2);
+			result = -result;
+		case 3:
+			result = strtol(valor+(sizeof(char)*2), NULL, 8);
+		case 4:
+			result = strtol(valor+(sizeof(char)*3), NULL, 8);
+			result = -result;
+		case 5: case 6: case 7: case 8:
+			result = strtol(valor, NULL, 0);
+		default:
+			erroSintaxe();
+	}
+	return result;
 }
 
 void armazenaPendencia(char *nome) {
@@ -180,48 +212,73 @@ char * convertToLower(char *str) {
 int confereNumeroNome(char *valor) { /*Testa se o numero ou nome eh valido*/
 	/* Codigos de retorno:
 	 * 0 - Nome
-	 * 1 - Binario
-	 * 2 - Octal
-	 * 3 - Decimal
-	 * 4 - Hexa
+	 * 1 - Binario +
+	 * 2 - Binario -
+	 * 3 - Octal +
+	 * 4 - Octal -
+	 * 5 - Decimal +
+	 * 6 - Decimal -
+	 * 7 - Hexa +
+	 * 8 - Hexa -
 	 */
 	int i;
+	int pos = 0;
+	bool negativo = false;
 	
-	switch(valor[0]) {
+	if (valor[pos] == '-') {
+		negativo = true;
+		pos++;
+	}
+	
+	switch(valor[pos]) {
 		/* Numero em base =/= 10 */
 		case '0':
+			pos++;
 			/* Hexadecimal */
-			if (valor[1] == 'x') {
-				for (i = 2; i < strlen(valor); i++)
+			if (valor[pos] == 'x') {
+				for (i = pos+1; i < strlen(valor); i++)
 					if ( ! (valor[i] == '0' || valor[i] == '1' || valor[i] == '2' || valor[i] == '3' || valor[i] == '4' || valor[i] == '5' || valor[i] == '6' || valor[i] == '7' || valor[i] == '8' || valor[i] == '9' || valor[i] == 'a' || valor[i] == 'b' || valor[i] == 'c' || valor[i] == 'd' || valor[i] == 'e' || valor[i] == 'f') )
 						erroSintaxe();
-				return 4;
+				if (negativo) return 8;
+				else return 7;
 			}
 			/* Octal */
-			if (valor[1] == 'o') {
-				for (i = 2; i < strlen(valor); i++)
+			else if (valor[pos] == 'o') {
+				for (i = pos+1; i < strlen(valor); i++)
 					if (! (valor[i] == '0' || valor[i] == '1' || valor[i] == '2' || valor[i] == '3' || valor[i] == '4' || valor[i] == '5' || valor[i] == '6' || valor[i] == '7') )
 						erroSintaxe();
-				return 2;
+				if (negativo) return 4;
+				else return 3;
 			}
 			/* Binario */
-			if (valor[1] == 'b') {
-				for (i = 2; i < strlen(valor); i++)
+			else if (valor[pos] == 'b') {
+				for (i = pos+1; i < strlen(valor); i++)
 					if ( !(valor[i] == '0' || valor[i] == '1') )
 						erroSintaxe();
-				return 1;
+				if (negativo) return 2;
+				else return 1;
+			}
+			else if (valor[pos] == NULL) /* Caso apenas um 0 (decimal) */
+				return 5;
+			else if ( isdigit(valor[pos]) ) { /* Caso seja um decimal comecando em 0 */
+				for (i = pos; i < strlen(valor); i++)
+					if (!isdigit(valor[i]))
+						erroSintaxe();
+				if (negativo) return 6;
+				else return 5;
 			}
 			else
 				erroSintaxe();
 		/* Numero em base decimal */
 		case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
-			for (i = 0; i < strlen(valor); i++)
-				if (! (valor[i] == '0' || valor[i] == '1' || valor[i] == '2' || valor[i] == '3' || valor[i] == '4' || valor[i] == '5' || valor[i] == '6' || valor[i] == '7' || valor[i] == '8' || valor[i] == '9') )
+			for (i = pos; i < strlen(valor); i++)
+				if (!isdigit(valor[i]))
 					erroSintaxe();
-			return 3;
+			if (negativo) return 6;
+			else return 5;
 		/* Nome */
 		default:
-			if (strlen(valor) > 100)
+			if (negativo == true || strlen(valor) > 100)
 				erroSintaxe();
 			for (i = 0; i < strlen(valor); i++) {
 				if ( !isalpha(valor[i]) && !(valor[i] == '_') )
@@ -231,7 +288,7 @@ int confereNumeroNome(char *valor) { /*Testa se o numero ou nome eh valido*/
 	}
 }
 
-void armazenaConstante(char nome[101], int valor) { 
+void armazenaConstante(char nome[101], long int valor) { 
 	struct Const * newConst;
 	int i;
 	
