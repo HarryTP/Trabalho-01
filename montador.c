@@ -42,8 +42,7 @@ void erroUsoNome() {
 	exit(1);
 }
 
-<<<<<<< HEAD
-=======
+
 long int converteStringNumero (char * valor, int tipo) { /* Converte um numero, dado na string valor, para um inteiro */
 	/* Tipos:
 	 * 1 - Binario +
@@ -75,7 +74,6 @@ long int converteStringNumero (char * valor, int tipo) { /* Converte um numero, 
 	}
 	return result;
 }
->>>>>>> origin/master
 
 void armazenaPendencia(char *nome) {
 	struct Label * label = NULL;
@@ -291,7 +289,6 @@ int confereNumeroNome(char *valor) { /*Testa se o numero ou nome eh valido*/
 	}
 }
 
-<<<<<<< HEAD
 char * isolaVariavel(char *argumento, int tipo) {
 	/*Tipo 0 = Operacao com um argumento
 	  Tipo 1 = Jump
@@ -313,10 +310,7 @@ char * isolaVariavel(char *argumento, int tipo) {
 	}
 }
 
-void armazenaConstante(char nome[101], int valor) { 
-=======
 void armazenaConstante(char nome[101], long int valor) { 
->>>>>>> origin/master
 	struct Const * newConst;
 	int i;
 	
