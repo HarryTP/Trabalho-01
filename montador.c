@@ -42,6 +42,7 @@ void erroUsoNome() {
 	exit(1);
 }
 
+
 void armazenaPendencia(char *nome) {
 	struct Label * label = NULL;
 	struct Const * set = NULL;
@@ -228,6 +229,27 @@ int confereNumeroNome(char *valor) { /*Testa se o numero ou nome eh valido*/
 					erroSintaxe();
 			}
 			return 0;
+	}
+}
+
+char * isolaVariavel(char *argumento, int tipo) {
+	/*Tipo 0 = Operacao com um argumento
+	  Tipo 1 = Jump
+	  Tipo 2 = Store*/
+	
+	char *variavel;
+	
+	if (!(argumento[0] == 'm' && argumento[1] == '(' && argumento[strlen(argumento)-1] == ')'))
+		erroSintaxe();
+	else {
+		switch(tipo) {
+			case 0:
+				strncpy(variavel, argumento+(sizeof(char)*2), strlen(argumento)-3);
+				variavel[strlen(argumento)-3] = '\0';
+				break;
+			case 1:
+				
+		}
 	}
 }
 
