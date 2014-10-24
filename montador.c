@@ -153,7 +153,7 @@ long int converteStringNumero (char * valor, int tipo) { /* Converte um numero, 
 	return result;
 }
 
-void armazenaPendencia(char *nome) {
+void armazenaPendencia(char * nome) {
 	struct Label * label = NULL;
 	struct Const * set = NULL;
 	struct Pend * pend = NULL;
@@ -178,7 +178,7 @@ void armazenaPendencia(char *nome) {
 	if (comecoPend == NULL) {
 		newPend = malloc(sizeof(struct Pend));
 		
-		newPend->nome = nome;
+		strcpy(newPend->nome, nome);
 		newPend->next = NULL;
 		
 		comecoPend = newPend;
@@ -195,7 +195,7 @@ void armazenaPendencia(char *nome) {
 		
 		newPend = malloc(sizeof(struct Pend));
 		
-		newPend->nome = nome;
+		strcpy(newPend->nome, nome);
 		newPend->next = NULL;
 		
 		finalPend->next = newPend;
@@ -337,7 +337,7 @@ int confereNumeroNome(char *valor) { /*Testa se o numero ou nome eh valido*/
 				if (negativo) return 2;
 				else return 1;
 			}
-			else if (valor[pos] == NULL) /* Caso apenas um 0 (decimal) */
+			else if (valor[pos] == '\0') /* Caso apenas um 0 (decimal) */
 				return 5;
 			else if ( isdigit(valor[pos]) ) { /* Caso seja um decimal comecando em 0 */
 				for (i = pos; i < strlen(valor); i++)
@@ -407,7 +407,7 @@ int confereTipo(char *valor) { /*Testa qual o tipo de valor*/
 				if (negativo) return 2;
 				else return 1;
 			}
-			else if (valor[pos] == NULL || isdigit(valor[pos])) /* Caso apenas um 0 (decimal) */
+			else if (valor[pos] == '\0' || isdigit(valor[pos])) { /* Caso apenas um 0 (decimal) */
 				if (negativo) return 6;
 				else return 5;
 			}
@@ -424,14 +424,13 @@ int confereTipo(char *valor) { /*Testa qual o tipo de valor*/
 }
 
 /* Busca uma label ou constante com nome "nome" e retorna o valor, ou NULL se nao estiver em nenhuma das listas */
-long int * buscaNome(char nome[101]) {
+long int * buscaNome(char nome[101], long int res[3]) {
 	/* Retorno:
 	 * [0] = Tipo (0 label, 1 constante)
 	 * [1] = Valor
 	 * [2] = Direita ou esquerda, caso seja label
 	 */
 	 
-	 long int res[3];
 	 struct Label * label;
 	 struct Const * constante;
 	 
