@@ -29,6 +29,7 @@ struct Pend *comecoPend = NULL;
 struct Pend *finalPend = NULL;
 int tracker[2] = {0, 0};
 int jumpType = 0; /*0 = nao eh usada, 1 = esquerda, 2 = direita*/
+long int * nameVal;
 
 void erroEnderecoInvalido() {
 	printf("Entrou em erroEnderecoInvalido\n");
@@ -136,16 +137,24 @@ long int converteStringNumero (char * valor, int tipo) { /* Converte um numero, 
 	switch (tipo) {
 		case 1:
 			result = strtol(valor+(sizeof(char)*2), NULL, 2);
+			break;
 		case 2:
 			result = strtol(valor+(sizeof(char)*3), NULL, 2);
 			result = -result;
+			break;
 		case 3:
 			result = strtol(valor+(sizeof(char)*2), NULL, 8);
+			break;
 		case 4:
 			result = strtol(valor+(sizeof(char)*3), NULL, 8);
 			result = -result;
-		case 5: case 6: case 7: case 8:
-			result = strtol(valor, NULL, 0);
+			break;
+		case 5: case 6: 
+			result = strtol(valor, NULL, 10);
+			break;
+		case 7: case 8:
+			result = strtol(valor, NULL, 16);
+			break;
 		default:
 			erroSintaxe();
 	}
@@ -287,7 +296,7 @@ char * convertToLower(char *str) {
 	return str;
 }
 
-int confereNumeroNome(char *valor) { /*Testa se o numero ou nome eh valido*/
+int confereNumeroNome(char * valor) { /*Testa se o numero ou nome eh valido*/
 	/* Codigos de retorno:
 	 * 0 - Nome
 	 * 1 - Binario +
@@ -359,7 +368,7 @@ int confereNumeroNome(char *valor) { /*Testa se o numero ou nome eh valido*/
 			if (negativo == true || strlen(valor) > 100)
 				erroSintaxe();
 			for (i = 0; i < strlen(valor); i++) {
-				if ( !isalpha(valor[i]) && !(valor[i] == '_') )
+				if ( !isalnum(valor[i]) && !(valor[i] == '_') )
 					erroSintaxe();
 			}
 			return 0;
@@ -555,6 +564,8 @@ char * isolaVariavel(char *argumento, int tipo) {
 			}
 		}
 	}
+	argumento = variavel;
+	return argumento;
 }
 
 void armazenaConstante(char nome[101], long int valor) { 
@@ -583,7 +594,11 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 	char *token;
 	int tipo;
 	long int val;
-	long int nameVal[3];
+	
+	/* Reset */
+	nameVal[0] = 0;
+	nameVal[1] = 0;
+	nameVal[2] = 0;
 	
 	if (arquivoSaida == NULL) {
 		if (!strcmp(op, "ldmq")) {
@@ -1081,7 +1096,7 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 				nameVal = buscaNome(token, nameVal);
 				if (nameVal[0] == 0) {
 					if (jumpType != 0)
-						erroSintaxe;()
+						erroSintaxe();
 					else if (nameVal[2] == 0)
 						imprime(arquivoSaida, 1, nameVal[1], 13);
 					else
@@ -1121,7 +1136,7 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 				nameVal = buscaNome(token, nameVal);
 				if (nameVal[0] == 0) {
 					if (jumpType != 0)
-						erroSintaxe;()
+						erroSintaxe();
 					else if (nameVal[2] == 0)
 						imprime(arquivoSaida, 1, nameVal[1], 15);
 					else
@@ -1317,7 +1332,7 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 				nameVal = buscaNome(token, nameVal);
 				if (nameVal[0] == 0) {
 					if (jumpType != 0)
-						erroSintaxe;()
+						erroSintaxe();
 					else if (nameVal[2] == 0)
 						imprime(arquivoSaida, 1, nameVal[1], 18);
 					else
@@ -1360,7 +1375,11 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 	int n;
 	int i;
 	long int val;
-	long int nameVal[3];
+	
+	/* Reset */
+	nameVal[0] = 0;
+	nameVal[1] = 0;
+	nameVal[2] = 0;
 	
 	if (arquivoSaida == NULL) {
 		if (!strcmp(dir, ".word")) {
@@ -1702,6 +1721,9 @@ void primeiraPassada(FILE * arquivoEntrada) {
 						erroSintaxe();
 				}
 			}
+			readLabel = false;
+			readDirective = false;
+			readOperation = false;
 		}
 	}
 	
@@ -1785,6 +1807,11 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 	
+	nameVal = malloc(sizeof(long int)*3);
+	nameVal[0] = 0;
+	nameVal[1] = 0;
+	nameVal[2] = 0;
+	
 	/*Execucao principal */
 	primeiraPassada(arquivoEntrada);
 	
@@ -1805,6 +1832,10 @@ int main(int argc, char *argv[]) {
 	tracker[1] = 0;
 	segundaPassada(arquivoEntrada, arquivoSaida);
 	
+	if (tracker[1] == 1) 
+		imprime(arquivoSaida, 1, 0, 0);
+	
+	free(nameVal);
 	fclose(arquivoEntrada);
 	fclose(arquivoSaida);
 	return 0;
