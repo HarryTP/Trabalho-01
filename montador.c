@@ -85,6 +85,11 @@ void freeAll() {
 }
 
 void imprime(FILE * arquivoSaida, int tipo, long int param, int codigo) {
+	/* Tipos:
+	 * 0 - Linha inteira (word ou wfill)
+	 * 1 - Meia linha
+	 */
+	 
 	unsigned int mask = 0b1111;
 	int parts[10];
 	int i;
@@ -415,6 +420,51 @@ int confereTipo(char *valor) { /*Testa qual o tipo de valor*/
 		default:
 			return 0;
 	}
+}
+
+/* Busca uma label ou constante com nome "nome" e retorna o valor, ou NULL se nao estiver em nenhuma das listas */
+long int * buscaNome(char nome[101]) {
+	/* Retorno:
+	 * [0] = Tipo (0 label, 1 constante)
+	 * [1] = Valor
+	 * [2] = Direita ou esquerda, caso seja label
+	 */
+	 
+	 long int res[3];
+	 struct Label * label;
+	 struct Const * constante;
+	 
+	 /* Busca na lista de labels, se nao achar apenas encerra o loop e a condicao */
+	 if (comecoLabels) {
+		 label = comecoLabels;
+		 while (label) {
+			 if(!strcmp(label->nome, nome)) {
+				res[0] = 0;
+				res[1] = label->endereco[0];
+				res[2] = label->endereco[1];
+				return res;
+			 }
+			 else
+				label = label->next;
+		 }
+	 }
+	 
+	 /* Busca na lista de constantes, se nao achar apenas encerra o loop e a condicao */
+	 if (comecoConst) {
+		 constante = comecoConst;
+		 while (constante) {
+			 if(!strcmp(constante->nome, nome)) {
+				res[0] = 1;
+				res[1] = constante->valor;
+				res[2] = 0;
+				return res;
+			 }
+			 else
+				constante = constante->next;
+		 }
+	 }
+	 
+	 return NULL;
 }
 
 char * isolaVariavel(char *argumento, int tipo) {
