@@ -42,6 +42,48 @@ void erroUsoNome() {
 	exit(1);
 }
 
+void freeAll() {
+	struct Label * atualLabels;
+	struct Const * atualConst;
+	struct Pend * atualPend;
+	
+	if (comecoLabels) {
+		atualLabels = comecoLabels;
+		while (comecoLabels != finalLabels) {
+			comecoLabels = comecoLabels->next;
+			free(atualLabels);
+			atualLabels = comecoLabels;
+		}
+		free(atualLabels);
+		comecoLabels = NULL;
+		finalLabels = NULL;
+	}
+	
+	if (comecoConst) {
+		atualConst = comecoConst;
+		while (comecoConst != finalConst) {
+			comecoConst = comecoConst->next;
+			free(atualConst);
+			atualConst = comecoConst;
+		}
+		free(atualConst);
+		comecoConst = NULL;
+		finalConst = NULL;
+	}
+	
+	if (comecoPend) {
+		atualPend = comecoPend;
+		while (comecoPend != finalPend) {
+			comecoPend = comecoPend->next;
+			free(atualPend);
+			atualPend = comecoPend;
+		}
+		free(atualPend);
+		comecoPend = NULL;
+		finalPend = NULL;
+	}
+}
+
 void imprime(FILE * arquivoSaida, int tipo, long int param, int codigo) {
 	unsigned int mask = 0b1111;
 	int parts[10];
@@ -315,6 +357,62 @@ int confereNumeroNome(char *valor) { /*Testa se o numero ou nome eh valido*/
 				if ( !isalpha(valor[i]) && !(valor[i] == '_') )
 					erroSintaxe();
 			}
+			return 0;
+	}
+}
+
+int confereTipo(char *valor) { /*Testa qual o tipo de valor*/
+	/* Codigos de retorno:
+	 * 0 - Nome
+	 * 1 - Binario +
+	 * 2 - Binario -
+	 * 3 - Octal +
+	 * 4 - Octal -
+	 * 5 - Decimal +
+	 * 6 - Decimal -
+	 * 7 - Hexa +
+	 * 8 - Hexa -
+	 */
+	int i;
+	int pos = 0;
+	bool negativo = false;
+	
+	if (valor[pos] == '-') {
+		negativo = true;
+		pos++;
+	}
+	
+	switch(valor[pos]) {
+		/* Numero em base =/= 10 */
+		case '0':
+			pos++;
+			/* Hexadecimal */
+			if (valor[pos] == 'x') {
+				if (negativo) return 8;
+				else return 7;
+			}
+			/* Octal */
+			else if (valor[pos] == 'o') {
+				if (negativo) return 4;
+				else return 3;
+			}
+			/* Binario */
+			else if (valor[pos] == 'b') {
+				if (negativo) return 2;
+				else return 1;
+			}
+			else if (valor[pos] == NULL || isdigit(valor[pos])) /* Caso apenas um 0 (decimal) */
+				if (negativo) return 6;
+				else return 5;
+			}
+			else
+				erroSintaxe();
+		/* Numero em base decimal */
+		case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+			if (negativo) return 6;
+			else return 5;
+		/* Nome */
+		default:
 			return 0;
 	}
 }
