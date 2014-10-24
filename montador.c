@@ -120,7 +120,6 @@ void imprime(FILE * arquivoSaida, int tipo, long int param, int codigo) {
 	}
 }
 
-
 long int converteStringNumero (char * valor, int tipo) { /* Converte um numero, dado na string valor, para um inteiro */
 	/* Tipos:
 	 * 1 - Binario +
@@ -153,7 +152,7 @@ long int converteStringNumero (char * valor, int tipo) { /* Converte um numero, 
 	return result;
 }
 
-void armazenaPendencia(char * nome) {
+void armazenaPendencia(char *nome) {
 	struct Label * label = NULL;
 	struct Const * set = NULL;
 	struct Pend * pend = NULL;
@@ -423,8 +422,7 @@ int confereTipo(char *valor) { /*Testa qual o tipo de valor*/
 	}
 }
 
-/* Busca uma label ou constante com nome "nome" e retorna o valor, ou NULL se nao estiver em nenhuma das listas */
-long int * buscaNome(char nome[101], long int res[3]) {
+long int * buscaNome(char nome[101], long int res[3]) { /* Busca uma label ou constante com nome "nome" e retorna o valor, ou NULL se nao estiver em nenhuma das listas */
 	/* Retorno:
 	 * [0] = Tipo (0 label, 1 constante)
 	 * [1] = Valor
@@ -585,6 +583,7 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 	char *token;
 	int tipo;
 	long int val;
+	long int nameVal[3];
 	
 	if (arquivoSaida == NULL) {
 		if (!strcmp(op, "ldmq")) {
@@ -950,6 +949,7 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 	}
 	else {
 		if (!strcmp(op, "ldmq")) {
+			imprime(arquivoSaida, 1, 0, 10);
 			if (tracker[1] == 0)
 				tracker[1] = 1;
 			else {
@@ -960,7 +960,19 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "ldmqm")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			
+			token = isolaVariavel(token, 0);
+			tipo = confereTipo(token);
+			if (tipo == 0) {
+				nameVal = buscaNome(token, nameVal);
+				if (nameVal[1] < 0 || nameVal[1] > 4095)
+					erroEnderecoInvalido();
+				else
+					imprime(arquivoSaida, 1, nameVal[1], 9);
+			}
+			else {
+				val = converteStringNumero(token, tipo);
+				imprime(arquivoSaida, 1, val, 9);
+			}
 			if (tracker[1] == 0)
 				tracker[1] = 1;
 			else {
@@ -971,7 +983,19 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "str")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			
+			token = isolaVariavel(token, 0);
+			tipo = confereTipo(token);
+			if (tipo == 0) {
+				nameVal = buscaNome(token, nameVal);
+				if (nameVal[1] < 0 || nameVal[1] > 4095)
+					erroEnderecoInvalido();
+				else
+					imprime(arquivoSaida, 1, nameVal[1], 33);
+			}
+			else {
+				val = converteStringNumero(token, tipo);
+				imprime(arquivoSaida, 1, val, 33);
+			}
 			if (tracker[1] == 0)
 				tracker[1] = 1;
 			else {
@@ -982,7 +1006,19 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "load")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			
+			token = isolaVariavel(token, 0);
+			tipo = confereTipo(token);
+			if (tipo == 0) {
+				nameVal = buscaNome(token, nameVal);
+				if (nameVal[1] < 0 || nameVal[1] > 4095)
+					erroEnderecoInvalido();
+				else
+					imprime(arquivoSaida, 1, nameVal[1], 1);
+			}
+			else {
+				val = converteStringNumero(token, tipo);
+				imprime(arquivoSaida, 1, val, 1);
+			}
 			if (tracker[1] == 0)
 				tracker[1] = 1;
 			else {
@@ -993,7 +1029,19 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "ldn")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			
+			token = isolaVariavel(token, 0);
+			tipo = confereTipo(token);
+			if (tipo == 0) {
+				nameVal = buscaNome(token, nameVal);
+				if (nameVal[1] < 0 || nameVal[1] > 4095)
+					erroEnderecoInvalido();
+				else
+					imprime(arquivoSaida, 1, nameVal[1], 2);
+			}
+			else {
+				val = converteStringNumero(token, tipo);
+				imprime(arquivoSaida, 1, val, 2);
+			}
 			if (tracker[1] == 0)
 				tracker[1] = 1;
 			else {
@@ -1004,7 +1052,19 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "ldabs")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			
+			token = isolaVariavel(token, 0);
+			tipo = confereTipo(token);
+			if (tipo == 0) {
+				nameVal = buscaNome(token, nameVal);
+				if (nameVal[1] < 0 || nameVal[1] > 4095)
+					erroEnderecoInvalido();
+				else
+					imprime(arquivoSaida, 1, nameVal[1], 3);
+			}
+			else {
+				val = converteStringNumero(token, tipo);
+				imprime(arquivoSaida, 1, val, 3);
+			}
 			if (tracker[1] == 0)
 				tracker[1] = 1;
 			else {
@@ -1015,7 +1075,36 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "jmp")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			
+			token = isolaVariavel(token, 1);
+			tipo = confereTipo(token);
+			if (tipo == 0) {
+				nameVal = buscaNome(token, nameVal);
+				if (nameVal[0] == 0) {
+					if (jumpType != 0)
+						erroSintaxe;()
+					else if (nameVal[2] == 0)
+						imprime(arquivoSaida, 1, nameVal[1], 13);
+					else
+						imprime(arquivoSaida, 1, nameVal[1], 14);
+				}
+				else if (jumpType == 0)
+					erroSintaxe();
+				else if (nameVal[1] < 0 || nameVal[1] > 4095)
+					erroEnderecoInvalido();
+				else if (jumpType == 1)
+					imprime(arquivoSaida, 1, nameVal[1], 13);
+				else
+					imprime(arquivoSaida, 1, nameVal[1], 14);
+			}
+			else {
+				val = converteStringNumero(token, tipo);
+				if (jumpType == 1)
+					imprime(arquivoSaida, 1, val, 13);
+				else if (jumpType == 2)
+					imprime(arquivoSaida, 1, val, 14);
+				else
+					erroSintaxe();
+			}
 			if (tracker[1] == 0)
 				tracker[1] = 1;
 			else {
@@ -1026,7 +1115,36 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "jgez")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			
+			token = isolaVariavel(token, 1);
+			tipo = confereTipo(token);
+			if (tipo == 0) {
+				nameVal = buscaNome(token, nameVal);
+				if (nameVal[0] == 0) {
+					if (jumpType != 0)
+						erroSintaxe;()
+					else if (nameVal[2] == 0)
+						imprime(arquivoSaida, 1, nameVal[1], 15);
+					else
+						imprime(arquivoSaida, 1, nameVal[1], 16);
+				}
+				else if (jumpType == 0)
+					erroSintaxe();
+				else if (nameVal[1] < 0 || nameVal[1] > 4095)
+					erroEnderecoInvalido();
+				else if (jumpType == 1)
+					imprime(arquivoSaida, 1, nameVal[1], 15);
+				else
+					imprime(arquivoSaida, 1, nameVal[1], 16);
+			}
+			else {
+				val = converteStringNumero(token, tipo);
+				if (jumpType == 1)
+					imprime(arquivoSaida, 1, val, 15);
+				else if (jumpType == 2)
+					imprime(arquivoSaida, 1, val, 16);
+				else
+					erroSintaxe();
+			}
 			if (tracker[1] == 0)
 				tracker[1] = 1;
 			else {
@@ -1037,7 +1155,19 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "add")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			
+			token = isolaVariavel(token, 0);
+			tipo = confereTipo(token);
+			if (tipo == 0) {
+				nameVal = buscaNome(token, nameVal);
+				if (nameVal[1] < 0 || nameVal[1] > 4095)
+					erroEnderecoInvalido();
+				else
+					imprime(arquivoSaida, 1, nameVal[1], 5);
+			}
+			else {
+				val = converteStringNumero(token, tipo);
+				imprime(arquivoSaida, 1, val, 5);
+			}
 			if (tracker[1] == 0)
 				tracker[1] = 1;
 			else {
@@ -1048,7 +1178,19 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "addabs")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			
+			token = isolaVariavel(token, 0);
+			tipo = confereTipo(token);
+			if (tipo == 0) {
+				nameVal = buscaNome(token, nameVal);
+				if (nameVal[1] < 0 || nameVal[1] > 4095)
+					erroEnderecoInvalido();
+				else
+					imprime(arquivoSaida, 1, nameVal[1], 7);
+			}
+			else {
+				val = converteStringNumero(token, tipo);
+				imprime(arquivoSaida, 1, val, 7);
+			}
 			if (tracker[1] == 0)
 				tracker[1] = 1;
 			else {
@@ -1059,7 +1201,19 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "sub")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			
+			token = isolaVariavel(token, 0);
+			tipo = confereTipo(token);
+			if (tipo == 0) {
+				nameVal = buscaNome(token, nameVal);
+				if (nameVal[1] < 0 || nameVal[1] > 4095)
+					erroEnderecoInvalido();
+				else
+					imprime(arquivoSaida, 1, nameVal[1], 6);
+			}
+			else {
+				val = converteStringNumero(token, tipo);
+				imprime(arquivoSaida, 1, val, 6);
+			}
 			if (tracker[1] == 0)
 				tracker[1] = 1;
 			else {
@@ -1070,7 +1224,19 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "subabs")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			
+			token = isolaVariavel(token, 0);
+			tipo = confereTipo(token);
+			if (tipo == 0) {
+				nameVal = buscaNome(token, nameVal);
+				if (nameVal[1] < 0 || nameVal[1] > 4095)
+					erroEnderecoInvalido();
+				else
+					imprime(arquivoSaida, 1, nameVal[1], 8);
+			}
+			else {
+				val = converteStringNumero(token, tipo);
+				imprime(arquivoSaida, 1, val, 8);
+			}
 			if (tracker[1] == 0)
 				tracker[1] = 1;
 			else {
@@ -1081,7 +1247,19 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "mul")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			
+			token = isolaVariavel(token, 0);
+			tipo = confereTipo(token);
+			if (tipo == 0) {
+				nameVal = buscaNome(token, nameVal);
+				if (nameVal[1] < 0 || nameVal[1] > 4095)
+					erroEnderecoInvalido();
+				else
+					imprime(arquivoSaida, 1, nameVal[1], 11);
+			}
+			else {
+				val = converteStringNumero(token, tipo);
+				imprime(arquivoSaida, 1, val, 11);
+			}
 			if (tracker[1] == 0)
 				tracker[1] = 1;
 			else {
@@ -1092,7 +1270,19 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "div")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			
+			token = isolaVariavel(token, 0);
+			tipo = confereTipo(token);
+			if (tipo == 0) {
+				nameVal = buscaNome(token, nameVal);
+				if (nameVal[1] < 0 || nameVal[1] > 4095)
+					erroEnderecoInvalido();
+				else
+					imprime(arquivoSaida, 1, nameVal[1], 12);
+			}
+			else {
+				val = converteStringNumero(token, tipo);
+				imprime(arquivoSaida, 1, val, 12);
+			}
 			if (tracker[1] == 0)
 				tracker[1] = 1;
 			else {
@@ -1101,6 +1291,7 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 			}
 		}
 		else if (!strcmp(op, "lsh")) {
+			imprime(arquivoSaida, 1, 0, 20);
 			if (tracker[1] == 0)
 				tracker[1] = 1;
 			else {
@@ -1109,6 +1300,7 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 			}
 		}
 		else if (!strcmp(op, "rsh")) {
+			imprime(arquivoSaida, 1, 0, 21);
 			if (tracker[1] == 0)
 				tracker[1] = 1;
 			else {
@@ -1119,7 +1311,36 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "stm")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			
+			token = isolaVariavel(token, 2);
+			tipo = confereTipo(token);
+			if (tipo == 0) {
+				nameVal = buscaNome(token, nameVal);
+				if (nameVal[0] == 0) {
+					if (jumpType != 0)
+						erroSintaxe;()
+					else if (nameVal[2] == 0)
+						imprime(arquivoSaida, 1, nameVal[1], 18);
+					else
+						imprime(arquivoSaida, 1, nameVal[1], 19);
+				}
+				else if (jumpType == 0)
+					erroSintaxe();
+				else if (nameVal[1] < 0 || nameVal[1] > 4095)
+					erroEnderecoInvalido();
+				else if (jumpType == 1)
+					imprime(arquivoSaida, 1, nameVal[1], 18);
+				else
+					imprime(arquivoSaida, 1, nameVal[1], 19);
+			}
+			else {
+				val = converteStringNumero(token, tipo);
+				if (jumpType == 1)
+					imprime(arquivoSaida, 1, val, 18);
+				else if (jumpType == 2)
+					imprime(arquivoSaida, 1, val, 19);
+				else
+					erroSintaxe();
+			}
 			if (tracker[1] == 0)
 				tracker[1] = 1;
 			else {
@@ -1138,7 +1359,8 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 	int tipo;
 	int n;
 	int i;
-	int val;
+	long int val;
+	long int nameVal[3];
 	
 	if (arquivoSaida == NULL) {
 		if (!strcmp(dir, ".word")) {
@@ -1148,7 +1370,13 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 				token = strtok(NULL, " \n");
 				token = convertToLower(token);
 				tipo = confereNumeroNome(token);
-				/*Caso seja um nome, tratar na lista de pendencias*/
+				if (tipo == 0)
+					armazenaPendencia(token);
+				else {
+					val = converteStringNumero(token, tipo);
+					if (val < -549755813888 || val > 549755813887)
+						erroEnderecoInvalido();
+				}
 				if (tracker[0] > 1023)
 					erroEnderecoInvalido();
 				tracker[0] = tracker[0]+1;
@@ -1161,11 +1389,36 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 				token = strtok(NULL, " \n");
 				token = convertToLower(token);
 				tipo = confereNumeroNome(token);
-				/*Trata o primeiro argumento de wfill e coloca em n*/
+				if (tipo == 0) {
+					nameVal = buscaNome(token, nameVal);
+					if (nameVal == NULL || nameVal[0] == 0)
+						erroSintaxe();
+					else {
+						if (nameVal[1] <= 0)
+							erroSintaxe();
+						else if (nameVal[1] > 1024)
+							erroEnderecoInvalido();
+						else
+							n = nameVal[1];
+					}
+				}
+				else {
+					n = converteStringNumero(token, tipo);
+					if (n <= 0)
+						erroSintaxe();
+					else if (n > 1024)
+						erroEnderecoInvalido();
+				}
 				token = strtok(NULL, " \n");
 				token = convertToLower(token);
 				tipo = confereNumeroNome(token);
-				/*Caso seja um nome, tratar na lista de pendencias*/
+				if (tipo == 0)
+					armazenaPendencia(token);
+				else {
+					val = converteStringNumero(token, tipo);
+					if (val < -549755813888 || val > 549755813887)
+						erroSintaxe();
+				}
 				for (i = 0; i < n; i++)
 					tracker[0] = tracker[0]+1;
 				if (tracker[0] > 1024)
@@ -1176,7 +1429,22 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
 			tipo = confereNumeroNome(token);
-			/*Trata o numero e coloca em n*/
+			if (tipo == 0) {
+				nameVal = buscaNome(token, nameVal);
+				if (nameVal == NULL || nameVal[0] == 0)
+					erroSintaxe();
+				else {
+					if (nameVal[1] < 0 || nameVal[1] > 1023)
+						erroEnderecoInvalido();
+					else
+						n = nameVal[1];
+				}
+			}
+			else {
+				n = converteStringNumero(token, tipo);
+				if (n < 0 || n > 1023)
+					erroEnderecoInvalido();
+				}
 			tracker[0] = n;
 			tracker[1] = 0;
 		}
@@ -1184,7 +1452,26 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
 			tipo = confereNumeroNome(token);
-			/*Trata o numero e coloca em n*/
+			if (tipo == 0) {
+				nameVal = buscaNome(token, nameVal);
+				if (nameVal == NULL || nameVal[0] == 0)
+					erroSintaxe();
+				else {
+					if (nameVal[1] <= 0)
+						erroSintaxe();
+					else if (nameVal[1] > 1024)
+						erroEnderecoInvalido();
+					else
+						n = nameVal[1];
+				}
+			}
+			else {
+				n = converteStringNumero(token, tipo);
+				if (n <= 0)
+					erroSintaxe();
+				else if (n > 1024)
+					erroEnderecoInvalido();
+			}
 			if (tracker[1] == 1) {
 				tracker[0] = tracker[0]+1;
 				tracker[1] = 0;
@@ -1209,8 +1496,19 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
 			tipo = confereNumeroNome(token);
-			/*Trata o numero e coloca em n*/
-			armazenaConstante(nomeConst, n);
+			if (tipo == 0) {
+				nameVal = buscaNome(token, nameVal);
+				if (nameVal == NULL || nameVal[0] == 0)
+					erroSintaxe();
+				else
+					val = nameVal[1];
+			}
+			else {
+				val = converteStringNumero(token, tipo);
+				if (val < -549755813888 || val > 549755813887)
+					erroSintaxe();
+			}
+			armazenaConstante(nomeConst, val);
 		}
 		else
 			erroSintaxe();
@@ -1219,55 +1517,73 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		if (!strcmp(dir, ".word")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			tipo = confereNumeroNome(token);
+			tipo = confereTipo(token);
 			if (tipo == 0) {
-				/*Busca nas listas de nomes e devolve o valor em val*/
+				nameVal = buscaNome(token, nameVal);
+				imprime(arquivoSaida, 0, nameVal[1], 0);
 			}
 			else {
-				/*Converte para int e coloca em val*/
+				val = converteStringNumero(token, tipo);
+				imprime(arquivoSaida, 0, val, 0);
 			}
-			/*Imprime val no arquivo*/
 			tracker[0] = tracker[0]+1;
 		}
 		else if(!strcmp(dir, ".wfill")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			tipo = confereNumeroNome(token);
-			/*Converte para int e coloca em n*/
-			token = strtok(NULL, " \n");
-			token = convertToLower(token);
-			tipo = confereNumeroNome(token);
+			tipo = confereTipo(token);
 			if (tipo == 0) {
-				/*Busca nas listas de nomes e devolve o valor em val*/
+				nameVal = buscaNome(token, nameVal);
+				n = nameVal[1];
 			}
 			else {
-				/*Converte para int e coloca em val*/
+				n = converteStringNumero(token, tipo);
+			}
+			token = strtok(NULL, " \n");
+			token = convertToLower(token);
+			tipo = confereTipo(token);
+			if (tipo == 0) {
+				nameVal = buscaNome(token, nameVal);
+				val = nameVal[1];
+			}
+			else {
+				val = converteStringNumero(token, tipo);
 			}
 			for (i = 0; i < n; i++) {
-				/*Imprime val no arquivo*/
+				imprime(arquivoSaida, 0, val, 0);
 				tracker[0] = tracker[0]+1;
 			}
 		}
 		else if(!strcmp(dir, ".org")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			tipo = confereNumeroNome(token);
-			/*Converte o numero e coloca em n*/
+			tipo = confereTipo(token);
+			if (tipo == 0) {
+				nameVal = buscaNome(token, nameVal);
+				n = nameVal[1];
+			}
+			else
+				n = converteStringNumero(token, tipo);
 			tracker[0] = n;
 			tracker[1] = 0;
 		}
 		else if(!strcmp(dir, ".align")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			tipo = confereNumeroNome(token);
-			/*Converte o numero e coloca em n*/
+			tipo = confereTipo(token);
+			if (tipo == 0) {
+				nameVal = buscaNome(token, nameVal);
+				n = nameVal[1];
+			}
+			else
+				n = converteStringNumero(token, tipo);
 			if (tracker[1] == 1) {
-				/*Imprime 0s*/
+				imprime(arquivoSaida, 1, 0, 0);
 				tracker[0] = tracker[0]+1;
 				tracker[1] = 0;
 			}
 			while (tracker[0]%n) {
-				/*Imprime 0s*/
+				imprime(arquivoSaida, 0, 0, 0);
 				tracker[0] = tracker[0]+1;
 			}
 		}
