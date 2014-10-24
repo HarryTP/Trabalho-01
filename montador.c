@@ -28,6 +28,7 @@ struct Const *finalConst = NULL;
 struct Pend *comecoPend = NULL;
 struct Pend *finalPend = NULL;
 int tracker[2] = {0, 0};
+int jumpType = 0; /*0 = nao eh usada, 1 = esquerda, 2 = direita*/
 
 void erroEnderecoInvalido() {
 	printf("Entrou em erroEnderecoInvalido\n");
@@ -472,18 +473,89 @@ char * isolaVariavel(char *argumento, int tipo) {
 	  Tipo 1 = Jump
 	  Tipo 2 = Store*/
 	
-	char *variavel;
+	char variavel[107];
+	char temp[6];
 	
-	if (!(argumento[0] == 'm' && argumento[1] == '(' && argumento[strlen(argumento)-1] == ')'))
+	jumpType = 0;
+	
+	if (strlen(argumento) > 109)
 		erroSintaxe();
 	else {
-		switch(tipo) {
-			case 0:
-				strncpy(variavel, argumento+(sizeof(char)*2), strlen(argumento)-3);
-				variavel[strlen(argumento)-3] = '\0';
-				break;
-			case 1:
-				
+		if (!(argumento[0] == 'm' && argumento[1] == '(' && argumento[strlen(argumento)-1] == ')'))
+			erroSintaxe();
+		else {
+			switch(tipo) {
+				case 0:
+					if (strlen(argumento) > 103)
+						erroSintaxe();
+					else {
+						strncpy(variavel, argumento+(sizeof(char)*2), strlen(argumento)-3);
+						variavel[strlen(argumento)-3] = '\0';
+						break;
+					}
+				case 1:
+					strncpy(variavel, argumento+(sizeof(char)*2), strlen(argumento)-3);
+					variavel[strlen(argumento)-3] = '\0';
+					strncpy(temp, variavel+(strlen(variavel)-5), 5);
+					temp[5] = '\0';
+					if (!strcmp(temp, ",0:19")) {
+						variavel[strlen(variavel)-5] = '\0';
+						if (strlen(variavel) > 100)
+							erroSintaxe();
+						else {
+							jumpType = 1;
+							break;
+						}
+					}
+					else if (!strcmp(temp, "20:39")) {
+						if (variavel[strlen(variavel)-6] != ',')
+							erroSintaxe();
+						else {
+							variavel[strlen(variavel)-6] = '\0';
+							if (strlen(variavel) > 100)
+								erroSintaxe();
+							else {
+								jumpType = 2;
+								break;
+							}
+						}
+					}
+					else if (confereNumeroNome(variavel) != 0)
+						erroSintaxe();
+					else
+						break;
+				case 2:
+					strncpy(variavel, argumento+(sizeof(char)*2), strlen(argumento)-3);
+					variavel[strlen(argumento)-3] = '\0';
+					strncpy(temp, variavel+(strlen(variavel)-5), 5);
+					temp[5] = '\0';
+					if (!strcmp(temp, ",8:19")) {
+						variavel[strlen(variavel)-5] = '\0';
+						if (strlen(variavel) > 100)
+							erroSintaxe();
+						else {
+							jumpType = 1;
+							break;
+						}
+					}
+					else if (!strcmp(temp, "28:39")) {
+						if (variavel[strlen(variavel)-6] != ',')
+							erroSintaxe();
+						else {
+							variavel[strlen(variavel)-6] = '\0';
+							if (strlen(variavel) > 100)
+								erroSintaxe();
+							else {
+								jumpType = 2;
+								break;
+							}
+						}
+					}
+					else if (confereNumeroNome(variavel) != 0)
+						erroSintaxe();
+					else
+						break;
+			}
 		}
 	}
 }
@@ -512,6 +584,8 @@ void armazenaConstante(char nome[101], long int valor) {
 
 void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL, primeira passada, senao segunda */
 	char *token;
+	int tipo;
+	long int val;
 	
 	if (arquivoSaida == NULL) {
 		if (!strcmp(op, "ldmq")) {
@@ -529,7 +603,15 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "ldmqm")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			/*Isola o valor dentro de M(), e analisa*/
+			token = isolaVariavel(token, 0);
+			tipo = confereNumeroNome(token);
+			if (tipo == 0)
+				armazenaPendencia(token);
+			else {
+				val = converteStringNumero(token, tipo);
+				if (val > 4095 || val < 0)
+					erroEnderecoInvalido();
+			}
 			if (tracker[0] < 1024) {
 				if (tracker[1] == 0)
 					tracker[1] = 1;
@@ -544,7 +626,15 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "str")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			/*Isola o valor dentro de M(), e analisa*/
+			token = isolaVariavel(token, 0);
+			tipo = confereNumeroNome(token);
+			if (tipo == 0)
+				armazenaPendencia(token);
+			else {
+				val = converteStringNumero(token, tipo);
+				if (val > 4095 || val < 0)
+					erroEnderecoInvalido();
+			}
 			if (tracker[0] < 1024) {
 				if (tracker[1] == 0)
 					tracker[1] = 1;
@@ -559,7 +649,15 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "load")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			/*Isola o valor dentro de M(), e analisa*/
+			token = isolaVariavel(token, 0);
+			tipo = confereNumeroNome(token);
+			if (tipo == 0)
+				armazenaPendencia(token);
+			else {
+				val = converteStringNumero(token, tipo);
+				if (val > 4095 || val < 0)
+					erroEnderecoInvalido();
+			}
 			if (tracker[0] < 1024) {
 				if (tracker[1] == 0)
 					tracker[1] = 1;
@@ -574,7 +672,15 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "ldn")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			/*Isola o valor dentro de M(), e analisa*/
+			token = isolaVariavel(token, 0);
+			tipo = confereNumeroNome(token);
+			if (tipo == 0)
+				armazenaPendencia(token);
+			else {
+				val = converteStringNumero(token, tipo);
+				if (val > 4095 || val < 0)
+					erroEnderecoInvalido();
+			}
 			if (tracker[0] < 1024) {
 				if (tracker[1] == 0)
 					tracker[1] = 1;
@@ -589,7 +695,15 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "ldabs")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			/*Isola o valor dentro de M(), e analisa*/
+			token = isolaVariavel(token, 0);
+			tipo = confereNumeroNome(token);
+			if (tipo == 0)
+				armazenaPendencia(token);
+			else {
+				val = converteStringNumero(token, tipo);
+				if (val > 4095 || val < 0)
+					erroEnderecoInvalido();
+			}
 			if (tracker[0] < 1024) {
 				if (tracker[1] == 0)
 					tracker[1] = 1;
@@ -604,7 +718,15 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "jmp")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			/*Isola o valor dentro de M(), e analisa, podendo haver 0:19 ou 20:39*/
+			token = isolaVariavel(token, 1);
+			tipo = confereNumeroNome(token);
+			if (tipo == 0)
+				armazenaPendencia(token);
+			else {
+				val = converteStringNumero(token, tipo);
+				if (val > 4095 || val < 0)
+					erroEnderecoInvalido();
+			}
 			if (tracker[0] < 1024) {
 				if (tracker[1] == 0)
 					tracker[1] = 1;
@@ -619,7 +741,15 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "jgez")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			/*Isola o valor dentro de M(), e analisa, podendo haver 0:19 ou 20:39*/
+			token = isolaVariavel(token, 1);
+			tipo = confereNumeroNome(token);
+			if (tipo == 0)
+				armazenaPendencia(token);
+			else {
+				val = converteStringNumero(token, tipo);
+				if (val > 4095 || val < 0)
+					erroEnderecoInvalido();
+			}
 			if (tracker[0] < 1024) {
 				if (tracker[1] == 0)
 					tracker[1] = 1;
@@ -634,7 +764,15 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "add")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			/*Isola o valor dentro de M(), e analisa*/
+			token = isolaVariavel(token, 0);
+			tipo = confereNumeroNome(token);
+			if (tipo == 0)
+				armazenaPendencia(token);
+			else {
+				val = converteStringNumero(token, tipo);
+				if (val > 4095 || val < 0)
+					erroEnderecoInvalido();
+			}
 			if (tracker[0] < 1024) {
 				if (tracker[1] == 0)
 					tracker[1] = 1;
@@ -649,7 +787,15 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "addabs")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			/*Isola o valor dentro de M(), e analisa*/
+			token = isolaVariavel(token, 0);
+			tipo = confereNumeroNome(token);
+			if (tipo == 0)
+				armazenaPendencia(token);
+			else {
+				val = converteStringNumero(token, tipo);
+				if (val > 4095 || val < 0)
+					erroEnderecoInvalido();
+			}
 			if (tracker[0] < 1024) {
 				if (tracker[1] == 0)
 					tracker[1] = 1;
@@ -664,7 +810,15 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "sub")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			/*Isola o valor dentro de M(), e analisa*/
+			token = isolaVariavel(token, 0);
+			tipo = confereNumeroNome(token);
+			if (tipo == 0)
+				armazenaPendencia(token);
+			else {
+				val = converteStringNumero(token, tipo);
+				if (val > 4095 || val < 0)
+					erroEnderecoInvalido();
+			}
 			if (tracker[0] < 1024) {
 				if (tracker[1] == 0)
 					tracker[1] = 1;
@@ -679,7 +833,15 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "subabs")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			/*Isola o valor dentro de M(), e analisa*/
+			token = isolaVariavel(token, 0);
+			tipo = confereNumeroNome(token);
+			if (tipo == 0)
+				armazenaPendencia(token);
+			else {
+				val = converteStringNumero(token, tipo);
+				if (val > 4095 || val < 0)
+					erroEnderecoInvalido();
+			}
 			if (tracker[0] < 1024) {
 				if (tracker[1] == 0)
 					tracker[1] = 1;
@@ -694,7 +856,15 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "mul")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			/*Isola o valor dentro de M(), e analisa*/
+			token = isolaVariavel(token, 0);
+			tipo = confereNumeroNome(token);
+			if (tipo == 0)
+				armazenaPendencia(token);
+			else {
+				val = converteStringNumero(token, tipo);
+				if (val > 4095 || val < 0)
+					erroEnderecoInvalido();
+			}
 			if (tracker[0] < 1024) {
 				if (tracker[1] == 0)
 					tracker[1] = 1;
@@ -709,7 +879,15 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "div")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			/*Isola o valor dentro de M(), e analisa*/
+			token = isolaVariavel(token, 0);
+			tipo = confereNumeroNome(token);
+			if (tipo == 0)
+				armazenaPendencia(token);
+			else {
+				val = converteStringNumero(token, tipo);
+				if (val > 4095 || val < 0)
+					erroEnderecoInvalido();
+			}
 			if (tracker[0] < 1024) {
 				if (tracker[1] == 0)
 					tracker[1] = 1;
@@ -748,7 +926,15 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else if (!strcmp(op, "stm")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
-			/*Isola o valor dentro de M(), e analisa, podendo haver 8:19 ou 28:39*/
+			token = isolaVariavel(token, 2);
+			tipo = confereNumeroNome(token);
+			if (tipo == 0)
+				armazenaPendencia(token);
+			else {
+				val = converteStringNumero(token, tipo);
+				if (val > 4095 || val < 0)
+					erroEnderecoInvalido();
+			}
 			if (tracker[0] < 1024) {
 				if (tracker[1] == 0)
 					tracker[1] = 1;

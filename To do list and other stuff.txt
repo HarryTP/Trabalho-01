@@ -1,6 +1,3 @@
-confereNumeroNome = lidar com negativo, 0 em decimal
+yay!
 
-conversão de string pra int = lidar com negativo e 0 em todas as bases
-
-Aumento de eficiência = fazer uma função parecida com a confereNumeroNome,
-que não confere tudo, só retorna a base/tipo do valor mais rapidamente, para ser usada na segunda passada
+porra da isola
