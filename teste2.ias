@@ -9,12 +9,14 @@ contador:
 i: .WORD 0
 resultado:
 .word 0b0
+posicaoinicialdovetor:
+.word 0b1110000
 
 .org 0o0
-inicio: load m(0x69)
+inicio: load m(posicaoinicialdovetor)
 ADD M(i)
 stm m(soma)
-LOAD m(0O150)
+LOAD m(resultado)
 soma:
 add m(0b0)
 sTR M(resultado)
