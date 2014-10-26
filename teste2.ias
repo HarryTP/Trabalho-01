@@ -27,7 +27,7 @@ load m(contador)
 SUB m(i)
 jgez m(inicio)
 load m(resultado)
-jmp m(final)
+jmp m(final,0:19)
 
 .org 0x70
 vetor:

@@ -1,0 +1,69 @@
+# Entradas
+.org 0x3FD
+inicio1:
+.word 0x150
+inicio2:
+.word 0x200
+tamanho:
+.word 0xA
+
+# Vetor 1
+.org 0x150
+.wfill 10 0b10
+
+# Vetor 2
+.org 0x200
+.wfill 010 0b0011 # <<<<<<<<<<<<<<<<<<<<<<<< FAIL
+
+# Variaveis
+.org 0x30
+i:
+.word 0
+Px:
+.word 0
+P:
+.word 0
+v1:
+.word 0
+v2:
+.word 0
+
+.set one 1
+
+# Inicio da execucao
+.org 0o0
+LOAD M(tamanho)
+SUB M(one)
+STR M(i)
+LOAD M(inicio1)
+STR M(v1)
+LOAD M(inicio2)
+STR M(v2)
+
+# Iteracao:
+iteracao:
+LOAD M(v1)
+STM M(load)
+LOAD M(v2)
+STM M(mul)
+load:
+LDMQM M(0)
+mul:
+MUL M(0)
+LDMQ
+STR M(Px)
+LOAD M(P)
+ADDABS M(Px)
+STR M(P)
+LOAD M(v1)
+ADD M(one)
+STR M(v1)
+LOAD M(v2)
+ADD M(one)
+STR M(v2)
+LOAD M(i)
+SUB M(one)
+STR M(i)
+JGEZ M(iteracao)
+LOAD M(P)
+JMP M(0x400,0:19)
