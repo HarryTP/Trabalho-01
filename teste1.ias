@@ -14,7 +14,7 @@ jgez M(0,0:19)
 lOaD m(0O402)
 jMp M(0x400,0:19)
 
-#variaveis
+# variaveis
 .OrG 256
 .word 10
 .WORD 0x01

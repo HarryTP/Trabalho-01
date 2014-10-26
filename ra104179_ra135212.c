@@ -41,7 +41,6 @@ int jumpType = 0; /* Variavel auxiliar para instrucoes com diferentes op codes p
 
 long int * nameVal; /* Variavel auxiliar utilizada na busca de rotulos e constantes nas listas */
 
-
 void freeAll() { /* Funcao para liberar memoria alocada para as listas */
 	struct Label * atualLabels;
 	struct Const * atualConst;
@@ -149,27 +148,40 @@ long int converteStringNumero (char * valor, int tipo) { /* Converte um numero, 
 	 * 8 - Hexa -
 	 */
 	long int result;
+	char temp[101];
 	
 	switch (tipo) {
 		case 1:
-			result = strtol(valor+(sizeof(char)*2), NULL, 2);
+			strncpy(temp, valor+(sizeof(char)*2), (strlen(valor)-2) );
+			temp[strlen(valor)-2] = '\0';
+			result = strtol(temp, NULL, 2);
 			break;
 		case 2:
-			result = strtol(valor+(sizeof(char)*3), NULL, 2);
+			strncpy(temp, valor+(sizeof(char)*3), (strlen(valor)-3) );
+			temp[strlen(valor)-3] = '\0';
+			result = strtol(temp, NULL, 2);
 			result = -result;
 			break;
 		case 3:
-			result = strtol(valor+(sizeof(char)*2), NULL, 8);
+			strncpy(temp, valor+(sizeof(char)*2), (strlen(valor)-2) );
+			temp[strlen(valor)-2] = '\0';
+			result = strtol(temp, NULL, 8);
 			break;
 		case 4:
+			strncpy(temp, valor+(sizeof(char)*3), (strlen(valor)-3) );
+			temp[strlen(valor)-3] = '\0';
 			result = strtol(valor+(sizeof(char)*3), NULL, 8);
 			result = -result;
 			break;
 		case 5: case 6: 
-			result = strtol(valor, NULL, 10);
+			strncpy(temp, valor, strlen(valor) );
+			temp[strlen(valor)] = '\0';
+			result = strtol(temp, NULL, 10);
 			break;
 		case 7: case 8:
-			result = strtol(valor, NULL, 16);
+			strncpy(temp, valor, strlen(valor) );
+			temp[strlen(valor)] = '\0';
+			result = strtol(temp, NULL, 16);
 			break;
 		default:
 			erroSintaxe();
@@ -365,11 +377,14 @@ int confereNumeroNome(char * valor) { /*Testa se o numero ou nome eh valido*/
 				if (negativo) return 2;
 				else return 1;
 			}
-			else if (valor[pos] == '\0') /* Caso apenas um 0 (decimal) */
+			/* Caso apenas um 0 (decimal) */
+			else if (valor[pos] == '\0')
 				return 5;
-			else if ( isdigit(valor[pos]) ) { /* Caso seja um decimal comecando em 0 */
+			/* Caso seja um decimal comecando em 0 */
+			else if ( valor[pos] == '0' || valor[pos] == '1' || valor[pos] == '2' || valor[pos] == '3' || valor[pos] == '4' || valor[pos] == '5' || valor[pos] == '6' || valor[pos] == '7' || valor[pos] == '8' || valor[pos] == '9' ) { 
 				for (i = pos; i < strlen(valor); i++)
-					if (!isdigit(valor[i]))
+					/* Se nao for um numero */
+					if (!(valor[i] == '0' || valor[i] == '1' || valor[i] == '2' || valor[i] == '3' || valor[i] == '4' || valor[i] == '5' || valor[i] == '6' || valor[i] == '7' || valor[i] == '8' || valor[i] == '9'))
 						erroSintaxe();
 				if (negativo) return 6;
 				else return 5;
@@ -379,7 +394,8 @@ int confereNumeroNome(char * valor) { /*Testa se o numero ou nome eh valido*/
 		/* Numero em base decimal */
 		case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
 			for (i = pos; i < strlen(valor); i++)
-				if (!isdigit(valor[i]))
+				/* Se nao for um numero */
+				if (!(valor[i] == '0' || valor[i] == '1' || valor[i] == '2' || valor[i] == '3' || valor[i] == '4' || valor[i] == '5' || valor[i] == '6' || valor[i] == '7' || valor[i] == '8' || valor[i] == '9'))
 					erroSintaxe();
 			if (negativo) return 6;
 			else return 5;
@@ -435,7 +451,8 @@ int confereTipo(char *valor) { /* Testa qual o tipo de valor (utilizada na segun
 				if (negativo) return 2;
 				else return 1;
 			}
-			else if (valor[pos] == '\0' || isdigit(valor[pos])) { /* Caso apenas um 0 (decimal) */
+			/* Caso apenas um 0 ou um decimal comecado em 0 */
+			else if (valor[pos] == '\0' || valor[pos] == '0' || valor[pos] == '1' || valor[pos] == '2' || valor[pos] == '3' || valor[pos] == '4' || valor[pos] == '5' || valor[pos] == '6' || valor[pos] == '7' || valor[pos] == '8' || valor[pos] == '9' ) {
 				if (negativo) return 6;
 				else return 5;
 			}
