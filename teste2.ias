@@ -1,0 +1,35 @@
+# teste montador ias: programa sum.hex incluso como exemplo com o simulador IAS
+
+.set fInAl 0x400
+
+.org 0o145
+constante1: .word 1
+contador:
+.word 0x27
+i: .WORD 0
+resultado:
+.word 0b0
+
+.org 0o0
+inicio: load m(0x69)
+ADD M(i)
+stm m(soma)
+LOAD m(0O150)
+soma:
+add m(0b0)
+sTR M(resultado)
+load m(i)
+ADd m(constante1)
+str m(i)
+load m(contador)
+SUB m(i)
+jgez m(inicio)
+load m(resultado)
+jmp m(final)
+
+.org 0x70
+vetor:
+.word 0o0001
+.word 0b10
+.Word 0xA
+.WoRd -366216421906
