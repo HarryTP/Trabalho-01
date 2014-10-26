@@ -1,50 +1,48 @@
+/* MC404 A - Trabalho 01 - Montador do IAS
+   Thales Carvalho Cremaschi Baumel   RA: 104179
+   Caio Teixeira					  RA: 135212*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 #include <ctype.h>
 
-struct Label {
+struct Label { /* Struct usada para a lista ligada de rotulos */
 	char nome[101];
 	int endereco[2];
 	struct Label * next;
 };
 
-struct Const {
+struct Const { /* Struct usada para a lista ligada de constantes definidas pelo .set */
 	char nome[101];
 	long int valor;
 	struct Const * next;
 };
 
-struct Pend {
+struct Pend { /* Struct usada para a lista de pendencias, usada para conferir o uso correto de labels e constantes */
 	char nome[101];
 	struct Pend * next;
 };
 
-struct Label *comecoLabels = NULL;
+struct Label *comecoLabels = NULL; /* Apontadores da lista de rotulos */
 struct Label *finalLabels = NULL;
-struct Const *comecoConst = NULL;
+
+struct Const *comecoConst = NULL; /* Apontadores da lista de constantes */
 struct Const *finalConst = NULL;
-struct Pend *comecoPend = NULL;
+
+struct Pend *comecoPend = NULL; /* Apontadores da lista de pendencias */
 struct Pend *finalPend = NULL;
-int tracker[2] = {0, 0};
-int jumpType = 0; /*0 = nao eh usada, 1 = esquerda, 2 = direita*/
-long int * nameVal;
 
-void erroEnderecoInvalido() {
-	printf("Entrou em erroEnderecoInvalido\n");
-	exit(1);
-}
-void erroSintaxe() { 
-	printf("Entrou em erroSintaxe\n");
-	exit(1);
-}
-void erroUsoNome() { 
-	printf("Entrou em erroUsoNome\n");
-	exit(1);
-}
+int tracker[2] = {0, 0}; /* Posicao do proximo endereco a ser escrito no mapa de memoria */
 
-void freeAll() {
+int jumpType = 0; /* Variavel auxiliar para instrucoes com diferentes op codes para direita e esquerda
+					0 = nao eh usada, 1 = esquerda, 2 = direita */
+
+long int * nameVal; /* Variavel auxiliar utilizada na busca de rotulos e constantes nas listas */
+
+
+void freeAll() { /* Funcao para liberar memoria alocada para as listas */
 	struct Label * atualLabels;
 	struct Const * atualConst;
 	struct Pend * atualPend;
@@ -86,9 +84,27 @@ void freeAll() {
 	}
 }
 
-void imprime(FILE * arquivoSaida, int tipo, long int param, int codigo) {
+/* Funcoes de erro */
+void erroEnderecoInvalido() {
+	printf("Erro: Endereco Invalido\n");
+	freeAll();
+	exit(1);
+}
+void erroSintaxe() { 
+	printf("Erro de Sintaxe\n");
+	freeAll();
+	exit(1);
+}
+void erroUsoNome() { 
+	printf("Erro no uso de rotulos ou constantes.\n");
+	freeAll();
+	exit(1);
+}
+
+
+void imprime(FILE * arquivoSaida, int tipo, long int param, int codigo) { /* Funcao para impressao no mapa de memoria */
 	/* Tipos:
-	 * 0 - Linha inteira (word ou wfill)
+	 * 0 - Linha inteira (usada nas diretivas .word, .wfill e .align)
 	 * 1 - Meia linha
 	 */
 	 
@@ -161,12 +177,13 @@ long int converteStringNumero (char * valor, int tipo) { /* Converte um numero, 
 	return result;
 }
 
-void armazenaPendencia(char *nome) {
+void armazenaPendencia(char *nome) { /* Funcao utilizada para inserir um novo elemento na lista de pendencias */
 	struct Label * label = NULL;
 	struct Const * set = NULL;
 	struct Pend * pend = NULL;
 	struct Pend * newPend;
 	
+	/* Primeiramente, a funcao percorre as listas de rotulos e constantes */
 	label = comecoLabels;
 	while (label) {
 		if (!strcmp(label->nome, nome))
@@ -183,6 +200,7 @@ void armazenaPendencia(char *nome) {
 			set = set->next;
 	}
 	
+	/* Caso nao exista um rotulo ou constante com o nome, adiciona na lista de pendencias o nome */
 	if (comecoPend == NULL) {
 		newPend = malloc(sizeof(struct Pend));
 		
@@ -211,7 +229,7 @@ void armazenaPendencia(char *nome) {
 	}
 }
 
-void confereConflitoNome(char *nome) { /*Confere se um nome ja nao foi usado*/
+void confereConflitoNome(char *nome) { /* Confere se um nome ja nao foi usado */
 	struct Label * label = NULL;
 	struct Const * set = NULL;
 	
@@ -232,7 +250,7 @@ void confereConflitoNome(char *nome) { /*Confere se um nome ja nao foi usado*/
 	}
 }
 
-void conferePendentes(char nome[101], int tipo) { /*Procura na lista de pendencias e remove*/ 
+void conferePendentes(char nome[101], int tipo) { /* Procura na lista de pendencias */ 
 	/*  Tipo 0 = Label
 		Tipo 1 = Constante */
 	 
@@ -241,7 +259,7 @@ void conferePendentes(char nome[101], int tipo) { /*Procura na lista de pendenci
 	 
 	if (comecoPend != NULL) {
 		current = comecoPend;
-		if (tipo == 0) { 
+		if (tipo == 0) { /* No caso de ser um rotulo, remove a pendencia da lista */
 			while (current) {
 				if ( !strcmp(current->nome, nome) ) {
 					if (comecoPend == finalPend && current == comecoPend) { /* Lista com 1 elemento */
@@ -274,7 +292,8 @@ void conferePendentes(char nome[101], int tipo) { /*Procura na lista de pendenci
 			}
 		}
 		
-		else if (tipo == 1) {
+		else if (tipo == 1) { /* Para as constantes, se o nome estiver nas pendencias eh emitido um erro,
+								 porque a constante foi utilizada antes de ser declarada */
 			while (current) {
 				if (!strcmp(current->nome, nome))
 					erroUsoNome();
@@ -285,7 +304,8 @@ void conferePendentes(char nome[101], int tipo) { /*Procura na lista de pendenci
 	}
 }
 
-char * convertToLower(char *str) {
+char * convertToLower(char *str) { /* Funcao que converte todos os tokens lidos para minusculas, para que o programa
+									  nao diferencie entre maiusculas e minusculas*/
 	int i;
 	
 	if (str != NULL) {
@@ -375,7 +395,7 @@ int confereNumeroNome(char * valor) { /*Testa se o numero ou nome eh valido*/
 	}
 }
 
-int confereTipo(char *valor) { /*Testa qual o tipo de valor*/
+int confereTipo(char *valor) { /* Testa qual o tipo de valor (utilizada na segunda passada) */
 	/* Codigos de retorno:
 	 * 0 - Nome
 	 * 1 - Binario +
@@ -474,7 +494,7 @@ long int * buscaNome(char nome[101], long int res[3]) { /* Busca uma label ou co
 	 return NULL;
 }
 
-char * isolaVariavel(char *argumento, int tipo) {
+char * isolaVariavel(char *argumento, int tipo) { /* Funcao que isola e confere o argumento de uma operacao, contido entre m() */
 	/*Tipo 0 = Operacao com um argumento
 	  Tipo 1 = Jump
 	  Tipo 2 = Store*/
@@ -600,7 +620,7 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 	nameVal[1] = 0;
 	nameVal[2] = 0;
 	
-	if (arquivoSaida == NULL) {
+	if (arquivoSaida == NULL) { /* Na primeira passada, apenas confere se a sintaxe esta certa, e avanca o tracker */
 		if (!strcmp(op, "ldmq")) {
 			if (tracker[0] < 1024) {
 				if (tracker[1] == 0)
@@ -962,7 +982,7 @@ void analisaInstrucao(char *op, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else
 			erroSintaxe();
 	}
-	else {
+	else { /* Na segunda passada, imprime a instrucao no mapa de memoria */
 		if (!strcmp(op, "ldmq")) {
 			imprime(arquivoSaida, 1, 0, 10);
 			if (tracker[1] == 0)
@@ -1381,7 +1401,8 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 	nameVal[1] = 0;
 	nameVal[2] = 0;
 	
-	if (arquivoSaida == NULL) {
+	if (arquivoSaida == NULL) { /* Na primeira passada, confere a sintaxe e os valores, avanca o tracker
+								   e armazena as constantes da diretiva .set */
 		if (!strcmp(dir, ".word")) {
 			if (tracker[1] == 1)
 				erroSintaxe();
@@ -1532,7 +1553,7 @@ void analisaDiretiva(char *dir, FILE *arquivoSaida) { /* Se arquivoSaida = NULL,
 		else
 			erroSintaxe();
 	}
-	else {
+	else { /* Na segunda passada imprime no mapa de memoria, e ignora a .set */
 		if (!strcmp(dir, ".word")) {
 			token = strtok(NULL, " \n");
 			token = convertToLower(token);
@@ -1656,7 +1677,9 @@ void armazenaLabel(char *label) {
 	conferePendentes(newLabel->nome, 0);
 }
 
-void primeiraPassada(FILE * arquivoEntrada) {
+void primeiraPassada(FILE * arquivoEntrada) { /* Durante a primeira passada, nada eh impresso no mapa de memoria
+												 o programa interpreta o arquivo de entrada, buscando por erros,
+												 e armazenando as labels e constantes */
 	char inputLine[1000];
 	char *token;
 	bool wholeLine = false;
@@ -1731,7 +1754,9 @@ void primeiraPassada(FILE * arquivoEntrada) {
 		erroUsoNome();
 }
 
-void segundaPassada(FILE * arquivoEntrada, FILE * arquivoSaida) {
+void segundaPassada(FILE * arquivoEntrada, FILE * arquivoSaida) { /* Na segunda passada, o programa praticamente so imprime
+																	 o mapa de memoria, apenas alguns erros que nao poderiam ter
+																	 sido detectados na primeira passada sao conferidos */
 	char inputLine[1000];
 	char *token;
 	bool wholeLine = false;
@@ -1836,6 +1861,7 @@ int main(int argc, char *argv[]) {
 		imprime(arquivoSaida, 1, 0, 0);
 	
 	free(nameVal);
+	freeAll();
 	fclose(arquivoEntrada);
 	fclose(arquivoSaida);
 	return 0;
