@@ -1,0 +1,22 @@
+# teste montador ias: programa fat.hex incluso como exemplo com o simulador IAS
+# programa sem uso de labels ou constantes
+
+ldMQm m(0X102)
+MUL M(0b100000011)
+ldmq
+StR M(0o00402)
+LOAD m(0x103)
+aDd m(257)
+STR M(259)
+load m(0b000000100000000)
+sub m(0X103)
+jgez M(0,0:19)
+lOaD m(0O402)
+jMp M(0x400,0:19)
+
+#variaveis
+.OrG 256
+.word 10
+.WORD 0x01
+.WoRd 0b1
+.wOrD 0o0001
